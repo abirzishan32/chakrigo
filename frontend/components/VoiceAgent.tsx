@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { vapi } from '@/lib/vapi.sdk';
 import { interviewer } from "@/constants";
 import { createFeedback } from "@/lib/actions/general.action";
-import AIRobotCanvas from "./AIRobotCanvas";
+import VoiceVisualization from "./VoiceVisualization";
 
 enum CallStatus {
     INACTIVE = 'INACTIVE',
@@ -18,6 +18,7 @@ enum CallStatus {
 interface SavedMessage {
     role: 'user' | 'system' | 'assistant';
     content: string;
+    timestamp?: string;
 }
 
 interface AgentProps {
@@ -28,9 +29,18 @@ interface AgentProps {
     type: "generate" | "interview";
     questions?: string[];
     saveResult?: boolean;
+    interviewTitle?: string;
 }
 
-const VoiceAgent = ({ userName, userId, type, interviewId, questions, saveResult = true }: AgentProps) => {
+const VoiceAgent = ({ 
+    userName, 
+    userId, 
+    type, 
+    interviewId, 
+    questions, 
+    saveResult = true,
+    interviewTitle = "AI Interview Session"
+}: AgentProps) => {
     const router = useRouter();
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
@@ -39,10 +49,20 @@ const VoiceAgent = ({ userName, userId, type, interviewId, questions, saveResult
     const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
     const [currentMessage, setCurrentMessage] = useState<string>("");
     const [isListening, setIsListening] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(true);
 
     // Typewriter effect for messages
     const [displayedMessage, setDisplayedMessage] = useState("");
     const [typewriterIndex, setTypewriterIndex] = useState(0);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
 
     useEffect(() => {
         const latestMessage = messages[messages.length - 1]?.content || "";
@@ -59,7 +79,7 @@ const VoiceAgent = ({ userName, userId, type, interviewId, questions, saveResult
             const timer = setTimeout(() => {
                 setDisplayedMessage(prev => prev + currentMessage[typewriterIndex]);
                 setTypewriterIndex(prev => prev + 1);
-            }, 30);
+            }, 20);
             return () => clearTimeout(timer);
         }
     }, [typewriterIndex, currentMessage]);
@@ -76,7 +96,11 @@ const VoiceAgent = ({ userName, userId, type, interviewId, questions, saveResult
 
         const onMessage = (message: any) => {
             if (message.type === 'transcript' && message.transcriptType === 'final') {
-                const newMessage = { role: message.role, content: message.transcript };
+                const newMessage = { 
+                    role: message.role, 
+                    content: message.transcript,
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
                 setMessages((prev) => [...prev, newMessage]);
                 
                 if (message.role === 'assistant') {
@@ -203,257 +227,235 @@ const VoiceAgent = ({ userName, userId, type, interviewId, questions, saveResult
         vapi.stop();
     };
 
-    const isCallInactiveOrFinished = callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED;
+    const getStatusText = () => {
+        if (callStatus === 'CONNECTING') return 'Connecting...';
+        if (isSpeaking) return 'AI is speaking...';
+        if (isListening) return 'Listening...';
+        if (callStatus === 'ACTIVE') return 'Connected';
+        return 'Ready to start';
+    };
+
+    const getStatusColor = () => {
+        if (callStatus === 'CONNECTING') return isDarkMode ? 'text-amber-400' : 'text-amber-600';
+        if (isSpeaking) return isDarkMode ? 'text-blue-400' : 'text-blue-600';
+        if (isListening) return isDarkMode ? 'text-green-400' : 'text-green-600';
+        if (callStatus === 'ACTIVE') return isDarkMode ? 'text-green-400' : 'text-green-600';
+        return isDarkMode ? 'text-gray-400' : 'text-gray-600';
+    };
+
+    // Theme classes
+    const bgClass = isDarkMode ? 'bg-gray-900' : 'bg-white';
+    const textClass = isDarkMode ? 'text-white' : 'text-gray-900';
+    const mutedTextClass = isDarkMode ? 'text-gray-400' : 'text-gray-600';
+    const borderClass = isDarkMode ? 'border-gray-700' : 'border-gray-200';
+    const panelClass = isDarkMode ? 'bg-gray-800/50' : 'bg-gray-50';
+    const messageBgClass = isDarkMode ? 'bg-gray-700/50' : 'bg-white';
+    const userMessageBgClass = isDarkMode ? 'bg-blue-600/20 border-blue-500/30' : 'bg-blue-50 border-blue-200';
 
     return (
-        <div className="min-h bg-black relative overflow-hidden">
-            {/* Tech Grid Background */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px]" />
-            
-            {/* Scanning Lines Effect */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-scan-line" />
-                <div className="absolute top-1/3 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent opacity-10 animate-scan-line-slow" />
-                <div className="absolute top-2/3 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-gray-500 to-transparent opacity-15 animate-scan-line-reverse" />
+        <div className={cn("min-h-screen transition-colors duration-300", bgClass)}>
+            {/* Header */}
+            <div className={cn("border-b", borderClass)}>
+                <div className="max-w-7xl mx-auto px-6 py-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-3">
+                                <div className={cn("w-3 h-3 rounded-full", 
+                                    callStatus === 'ACTIVE' ? 'bg-green-500' : 
+                                    callStatus === 'CONNECTING' ? 'bg-amber-500' : 'bg-gray-400'
+                                )} />
+                                <h1 className={cn("text-xl font-semibold", textClass)}>
+                                    {interviewTitle}
+                                </h1>
+                            </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-6">
+                            {/* Timer */}
+                            <div className="flex items-center space-x-2">
+                                <svg className={cn("w-4 h-4", mutedTextClass)} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className={cn("font-mono text-lg", textClass)}>{formatTime(elapsedTime)}</span>
+                            </div>
+
+                            {/* Theme Toggle */}
+                            <button
+                                onClick={() => setIsDarkMode(!isDarkMode)}
+                                className={cn(
+                                    "p-2 rounded-lg transition-colors",
+                                    isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+                                )}
+                            >
+                                {isDarkMode ? (
+                                    <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
+                                    </svg>
+                                ) : (
+                                    <svg className="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                                    </svg>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {/* Corner Frame Elements */}
-            <div className="absolute top-0 left-0 w-16 h-16 border-l-2 border-t-2 border-white opacity-60" />
-            <div className="absolute top-0 right-0 w-16 h-16 border-r-2 border-t-2 border-white opacity-60" />
-            <div className="absolute bottom-0 left-0 w-16 h-16 border-l-2 border-b-2 border-white opacity-60" />
-            <div className="absolute bottom-0 right-0 w-16 h-16 border-r-2 border-b-2 border-white opacity-60" />
+            {/* Main Interface */}
+            <div className="max-w-7xl mx-auto p-6 h-[calc(100vh-80px)]">
+                <div className="flex gap-6 h-full">
+                    {/* Left Panel - AI Control Center */}
+                    <div className="w-80 flex-shrink-0">
+                        <div className={cn("h-full rounded-xl border p-6 flex flex-col", panelClass, borderClass)}>
+                            {/* Voice Visualization */}
+                            <div className="flex-1 flex items-center justify-center mb-8">
+                                <VoiceVisualization 
+                                    isSpeaking={isSpeaking}
+                                    isListening={isListening}
+                                    isActive={callStatus === 'ACTIVE'}
+                                    isDarkMode={isDarkMode}
+                                />
+                            </div>
 
-            {/* Main Container */}
-            <div className="relative z-10 container mx-auto px-6 py-8 max-w-7xl">
-                {/* Header Section */}
-                <div className="mb-8">
-                    <div className="bg-gray-900/90 backdrop-blur-xl border border-gray-700 rounded-none shadow-2xl relative overflow-hidden">
-                        {/* Header accent line */}
-                        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-white to-transparent" />
-                        
-                        <div className="p-6">
-                            <div className="flex justify-between items-center">
-                                <div className="flex items-center space-x-4">
-                                    <div className="w-3 h-12 bg-white rounded-none animate-pulse" />
-                                    <div>
-                                        <h1 className="text-3xl font-bold text-white tracking-wider font-mono">
-                                            AI Interview System
-                                        </h1>
-                                        
-                                    </div>
+                            {/* Status */}
+                            <div className="text-center mb-8">
+                                <div className={cn("text-sm font-medium mb-2", getStatusColor())}>
+                                    {getStatusText()}
                                 </div>
-                                
-                                {/* Status Indicators */}
-                                <div className="flex items-center space-x-6">
+                                <div className={cn("text-xs", mutedTextClass)}>
+                                    {callStatus === 'ACTIVE' ? 'Session in progress' : 'Waiting to connect'}
+                                </div>
+                            </div>
+
+                            {/* Controls */}
+                            <div className="space-y-4">
+                                {callStatus !== 'ACTIVE' ? (
+                                    <button
+                                        onClick={handleCall}
+                                        disabled={callStatus === 'CONNECTING'}
+                                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                                    >
+                                        {callStatus === 'CONNECTING' ? (
+                                            <>
+                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                <span>Connecting...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                </svg>
+                                                <span>Start Interview</span>
+                                            </>
+                                        )}
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={handleDisconnect}
+                                        className="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
+                                        </svg>
+                                        <span>End Interview</span>
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Panel - Conversation Transcript */}
+                    <div className="flex-1">
+                        <div className={cn("h-full rounded-xl border flex flex-col", panelClass, borderClass)}>
+                            {/* Chat Header */}
+                            <div className={cn("px-6 py-4 border-b", borderClass)}>
+                                <div className="flex items-center justify-between">
+                                    <h2 className={cn("text-lg font-semibold", textClass)}>Interview Transcript</h2>
                                     <div className="flex items-center space-x-2">
-                                        <div className={cn(
-                                            "w-3 h-3 rounded-none animate-pulse",
-                                            callStatus === 'ACTIVE' ? 'bg-green-400' : 
-                                            callStatus === 'CONNECTING' ? 'bg-yellow-400' : 'bg-red-400'
+                                        <div className={cn("w-2 h-2 rounded-full animate-pulse", 
+                                            isSpeaking ? 'bg-blue-500' : 
+                                            isListening ? 'bg-green-500' : 'bg-gray-400'
                                         )} />
-                                        <span className="text-white text-sm font-mono uppercase tracking-wider">
-                                            [{callStatus}]
+                                        <span className={cn("text-sm", getStatusColor())}>
+                                            {getStatusText()}
                                         </span>
                                     </div>
-                                    
-                                    <div className="bg-black/80 backdrop-blur-sm px-4 py-2 border border-gray-600 rounded-none">
-                                        <div className="flex items-center space-x-2 text-white">
-                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" />
+                                </div>
+                            </div>
+
+                            {/* Messages */}
+                            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                                {messages.length === 0 ? (
+                                    <div className="flex items-center justify-center h-full">
+                                        <div className="text-center">
+                                            <svg className={cn("w-12 h-12 mx-auto mb-4", mutedTextClass)} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                             </svg>
-                                            <span className="font-mono text-lg tracking-wider">{formatTime(elapsedTime)}</span>
+                                            <h3 className={cn("text-lg font-medium mb-2", textClass)}>Ready to begin</h3>
+                                            <p className={cn("text-sm", mutedTextClass)}>
+                                                Your conversation will appear here once the interview starts
+                                            </p>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Main Interview Interface */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* AI Robot Section */}
-                    <div className="lg:col-span-1">
-                        <div className="bg-gray-900/90 backdrop-blur-xl border border-gray-700 rounded-none shadow-2xl h-full relative overflow-hidden">
-                            {/* Side accent lines */}
-                            <div className="absolute left-0 top-0 w-[2px] h-full bg-gradient-to-b from-transparent via-white to-transparent opacity-60" />
-                            <div className="absolute right-0 top-0 w-[2px] h-full bg-gradient-to-b from-transparent via-gray-400 to-transparent opacity-30" />
-                            
-                            <div className="p-6">
-                                <div className="text-center mb-6">
-                                    <h3 className="text-xl font-bold text-white tracking-wider font-mono mb-2">
-                                        AI Interviewer
-                                    </h3>
-                                    
-                                </div>
-                                
-                                {/* AI Robot Canvas */}
-                                <div className="relative mb-6">
-                                    <AIRobotCanvas 
-                                        isSpeaking={isSpeaking} 
-                                        isListening={isListening}
-                                        callStatus={callStatus}
-                                    />
-                                </div>
-
-                                {/* AI Status */}
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-400 text-sm font-mono tracking-wide">Process State:</span>
-                                        <span className={cn(
-                                            "px-3 py-1 border text-xs font-mono uppercase tracking-wider",
-                                            isSpeaking ? "bg-white/10 text-white border-white animate-pulse" :
-                                            isListening ? "bg-green-500/10 text-green-400 border-green-400" :
-                                            "bg-gray-700/50 text-gray-400 border-gray-600"
-                                        )}>
-                                            {isSpeaking ? "[SPEAKING]" : isListening ? "[LISTENING]" : "[IDLE]"}
-                                        </span>
-                                    </div>
-                                    
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-400 text-sm font-mono tracking-wide">Neural Activity:</span>
-                                        <div className="flex space-x-1">
-                                            {[...Array(5)].map((_, i) => (
-                                                <div
-                                                    key={i}
-                                                    className={cn(
-                                                        "w-2 h-6 border",
-                                                        (isSpeaking || isListening) ? "bg-white border-white animate-pulse" : "bg-gray-700 border-gray-600"
-                                                    )}
-                                                    style={{
-                                                        animationDelay: `${i * 0.1}s`
-                                                    }}
-                                                />
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Communication Panel */}
-                    <div className="lg:col-span-2">
-                        <div className="bg-gray-900/90 backdrop-blur-xl border border-gray-700 rounded-none shadow-2xl h-full relative overflow-hidden">
-                            {/* Top accent line */}
-                            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-white to-transparent opacity-60" />
-                            
-                            <div className="p-6">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h3 className="text-xl font-bold text-white tracking-wider font-mono">
-                                        Interview Interface
-                                    </h3>
-                                    <div className="flex items-center space-x-2">
-                                        <div className="w-2 h-2 bg-green-400 animate-pulse" />
-                                        <span className="text-green-400 text-sm font-mono tracking-wide">LIVE_TRANSMISSION</span>
-                                    </div>
-                                </div>
-
-                                {/* Message Display */}
-                                <div className="mb-6">
-                                    <div className="bg-black/80 border border-gray-600 p-6 min-h-[320px] relative overflow-hidden">
-                                        {/* Terminal-style header */}
-                                        <div className="flex items-center space-x-2 mb-4 pb-2 border-b border-gray-700">
-                                            <div className="w-3 h-3 bg-red-500"></div>
-                                            <div className="w-3 h-3 bg-yellow-500"></div>
-                                            <div className="w-3 h-3 bg-green-500"></div>
-                                            <span className="text-gray-400 text-xs font-mono ml-4">Terminal</span>
-                                        </div>
-
-                                        {/* Message Content */}
-                                        <div className="relative z-10">
-                                            {displayedMessage ? (
-                                                <div className="space-y-4">
+                                ) : (
+                                    <>
+                                        {messages.map((message, index) => (
+                                            <div key={index} className={cn("flex", message.role === 'user' ? 'justify-end' : 'justify-start')}>
+                                                <div className={cn("max-w-[80%] rounded-lg p-4 shadow-sm", 
+                                                    message.role === 'user' 
+                                                        ? cn("border", userMessageBgClass)
+                                                        : cn("border", messageBgClass, borderClass)
+                                                )}>
                                                     <div className="flex items-start space-x-3">
-                                                        <div className="w-8 h-8 bg-white border border-gray-600 flex items-center justify-center flex-shrink-0">
-                                                            <svg className="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 20 20">
-                                                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                            </svg>
+                                                        <div className={cn("w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
+                                                            message.role === 'user' 
+                                                                ? 'bg-blue-600 text-white' 
+                                                                : isDarkMode ? 'bg-gray-600 text-white' : 'bg-gray-200 text-gray-700'
+                                                        )}>
+                                                            {message.role === 'user' ? (
+                                                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                                                </svg>
+                                                            ) : (
+                                                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 8a1 1 0 011-1h12a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1v-4z" clipRule="evenodd" />
+                                                                </svg>
+                                                            )}
                                                         </div>
                                                         <div className="flex-1">
-                                                            <div className="bg-gray-800/80 border border-gray-600 p-4">
-                                                                <p className="text-white leading-relaxed font-mono text-sm">
-                                                                    {displayedMessage}
-                                                                    {typewriterIndex < currentMessage.length && (
-                                                                        <span className="animate-pulse text-white">█</span>
-                                                                    )}
-                                                                </p>
+                                                            <div className="flex items-center space-x-2 mb-1">
+                                                                <span className={cn("text-sm font-medium", textClass)}>
+                                                                    {message.role === 'user' ? 'You' : 'AI Interviewer'}
+                                                                </span>
+                                                                {message.timestamp && (
+                                                                    <span className={cn("text-xs", mutedTextClass)}>{message.timestamp}</span>
+                                                                )}
                                                             </div>
+                                                            <p className={cn("text-sm leading-relaxed", textClass)}>
+                                                                {index === messages.length - 1 && message.role === 'assistant' ? (
+                                                                    <>
+                                                                        {displayedMessage}
+                                                                        {typewriterIndex < currentMessage.length && (
+                                                                            <span className="animate-pulse">|</span>
+                                                                        )}
+                                                                    </>
+                                                                ) : (
+                                                                    message.content
+                                                                )}
+                                                            </p>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            ) : (
-                                                <div className="flex items-center justify-center h-full text-gray-500">
-                                                    <div className="text-center">
-                                                        <div className="w-16 h-16 bg-gray-800 border border-gray-600 flex items-center justify-center mx-auto mb-4">
-                                                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                                            </svg>
-                                                        </div>
-                                                        <p className="text-lg font-mono text-white">Interface Ready</p>
-                                                        <p className="text-sm font-mono text-gray-400">Communication Channel Established</p>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Terminal-style cursor in bottom corner */}
-                                        <div className="absolute bottom-2 right-2 text-gray-500 font-mono text-xs">
-                                            {displayedMessage ? ">" : "_"}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Control Panel */}
-                                <div className="flex justify-center">
-                                    {callStatus !== 'ACTIVE' ? (
-                                        <button
-                                            className="group relative px-12 py-4 bg-white hover:bg-gray-200 text-black font-bold font-mono tracking-wider border-2 border-white shadow-2xl transform transition-all duration-300 hover:scale-105 uppercase"
-                                            onClick={handleCall}
-                                            disabled={callStatus === 'CONNECTING'}
-                                        >
-                                            {/* Button glow effect */}
-                                            <div className="absolute -inset-1 bg-white opacity-20 group-hover:opacity-40 transition duration-300" />
-                                            
-                                            <div className="relative flex items-center space-x-3">
-                                                {callStatus === 'CONNECTING' ? (
-                                                    <>
-                                                        <div className="w-5 h-5 border-2 border-black border-t-transparent animate-spin" />
-                                                        <span>INITIALIZING_NEURAL_LINK</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
-                                                        </svg>
-                                                        <span>Start Interview</span>
-                                                    </>
-                                                )}
                                             </div>
-                                        </button>
-                                    ) : (
-                                        <button
-                                            className="group relative px-12 py-4 bg-red-600 hover:bg-red-500 text-white font-bold font-mono tracking-wider border-2 border-red-600 shadow-2xl transform transition-all duration-300 hover:scale-105 uppercase"
-                                            onClick={handleDisconnect}
-                                        >
-                                            <div className="absolute -inset-1 bg-red-600 opacity-20 group-hover:opacity-40 transition duration-300" />
-                                            
-                                            <div className="relative flex items-center space-x-3">
-                                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 012 0v6a1 1 0 11-2 0V7zM12 7a1 1 0 012 0v6a1 1 0 11-2 0V7z" />
-                                                </svg>
-                                                <span>TERMINATE_SESSION</span>
-                                            </div>
-                                        </button>
-                                    )}
-                                </div>
+                                        ))}
+                                        <div ref={messagesEndRef} />
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
                 </div>
-
-                
             </div>
         </div>
     );
