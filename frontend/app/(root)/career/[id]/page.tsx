@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: CareerDetailPageProps) {
   
   if (!result.success || !result.data) {
     return {
-      title: "Experience Not Found | Candid Minds",
+      title: "Experience Not Found | ChakriGO",
       description: "The interview experience you're looking for could not be found."
     };
   }
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: CareerDetailPageProps) {
   const experience = result.data;
   
   return {
-    title: `${experience.companyName} - ${experience.position} Interview Experience | Candid Minds`,
+    title: `${experience.companyName} - ${experience.position} Interview Experience | ChakriGO`,
     description: `Anonymous interview experience for ${experience.position} position at ${experience.companyName}. Read about the interview process and questions.`
   };
 }

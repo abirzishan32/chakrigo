@@ -11,12 +11,12 @@ export async function generateMetadata({ params }: { params: { folderId: string 
   
   if (!success || !folder) {
     return {
-      title: "Folder Not Found | Candid Minds",
+      title: "Folder Not Found | ChakriGO",
     };
   }
   
   return {
-    title: `${folder.name} | Code Snippets | Candid Minds`,
+    title: `${folder.name} | Code Snippets | ChakriGO`,
   };
 }
 

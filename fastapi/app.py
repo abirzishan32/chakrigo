@@ -44,16 +44,11 @@ app.include_router(system_design_router)
 def read_root():
     """Root endpoint with welcome message"""
     return {
-        "message": "AI Content Generation Platform",
-        "services": [
-            "AI Animation Generator",
-            "System Design Generator"
-        ],
-        "features": [
-            "LangGraph workflows",
-            "Streaming progress updates",
-            "Interactive visualizations"
-        ]
+        # not a real API, just a placeholder
+        "message": "Welcome to the Interview AI Platform",
+        "documentation": "/docs",
+        "api_version": "1.0.0",
+        
     }
 
 @app.get("/health")

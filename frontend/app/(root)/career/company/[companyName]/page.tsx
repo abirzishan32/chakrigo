@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: CompanyPageProps) {
   const decodedCompanyName = decodeURIComponent(companyName);
   
   return {
-    title: `${decodedCompanyName} Interview Experiences | Candid Minds`,
+    title: `${decodedCompanyName} Interview Experiences | ChakriGO`,
     description: `Read anonymous interview experiences from ${decodedCompanyName}. Learn about the interview process, questions, and preparation tips.`
   };
 }

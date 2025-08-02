@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 export const metadata: Metadata = {
-  title: "Create New Code Snippet | Candid Minds",
+  title: "Create New Code Snippet | ChakriGO",
   description: "Create a new code snippet in your library",
 };
 

@@ -29,7 +29,7 @@ export default async function HomePage() {
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
                 <span className="block">Ace Your Interviews with</span>
                 <span className="bg-gradient-to-r from-primary-100 to-blue-600 bg-clip-text text-transparent">
-                  Candid Minds
+                  ChakriGO
                 </span>
               </h1>
               
@@ -412,7 +412,7 @@ export default async function HomePage() {
                 </div>
                 
                 <h3 className="text-2xl md:text-3xl font-bold mb-4">
-                  Want to host your company's interviews on Candid Minds?
+                  Want to host your company's interviews on ChakriGO?
                 </h3>
                 
                 <p className="text-gray-400 mb-5">
@@ -478,15 +478,15 @@ export default async function HomePage() {
               <Link href="/" className="flex items-center gap-3 group mb-4">
                 <div className="relative overflow-hidden rounded-full nav-logo-glow bg-gradient-to-r from-primary-100 to-blue-600 p-0.5">
                   <Image 
-                    src="/candid-minds-logo.png" 
-                    alt="Candid Minds" 
+                    src="/chakrigo-logo.png" 
+                    alt="ChakriGO" 
                     width={32} 
                     height={32}
                     className="rounded-full" 
                   />
                 </div>
                 <h2 className="text-primary-100 font-bold tracking-wide text-lg"> 
-                  Candid<span className="text-white">Minds</span>
+                  Chakri<span className="text-white">GO</span>
                 </h2>
               </Link>
               <p className="text-gray-400 text-sm mb-6">
@@ -551,7 +551,7 @@ export default async function HomePage() {
           {/* Bottom Bar */}
           <div className="pt-8 border-t border-gray-800/50 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-500 text-sm">
-              © {new Date().getFullYear()} CandidMinds Inc. All rights reserved.
+              © {new Date().getFullYear()} ChakriGO Inc. All rights reserved.
             </p>
             <div className="flex items-center gap-2">
               <span className="px-3 py-1 bg-gray-900 rounded text-xs text-gray-400">

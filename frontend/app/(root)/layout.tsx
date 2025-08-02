@@ -72,8 +72,8 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
                             <Link href="/" className="flex items-center gap-3 group">
                                 <div className="relative overflow-hidden rounded-full p-0.5">
                                     <Image 
-                                        src="/candid-minds-logo.png" 
-                                        alt="Candid Minds" 
+                                        src="/chakrigo-logo.png" 
+                                        alt="ChakriGO Logo" 
                                         width={40} 
                                         height={34}
                                         className="rounded-full transform transition-transform group-hover:scale-110 duration-300" 
@@ -81,7 +81,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
                                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-all"></div>
                                 </div>
                                 <h2 className="text-primary-100 font-bold tracking-wide group-hover:text-white transition-colors"> 
-                                    Candid<span className="text-white">Minds</span>
+                                    Chakri<span className="text-white">GO</span>
                                 </h2>
                             </Link>
                             

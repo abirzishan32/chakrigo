@@ -5,7 +5,7 @@ import { AlignJustify, Code, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Algorithm Visualizer | Candid Minds",
+  title: "Algorithm Visualizer | ChakriGO",
   description: "Interactive visualizations of various algorithms",
 };
 

@@ -165,8 +165,8 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
               <div className="absolute inset-0 bg-gradient-to-r from-primary-100 to-blue-600 rounded-full blur-sm opacity-30 animate-pulse"></div>
               <div className="relative p-0.5 bg-gradient-to-r from-primary-100 to-blue-600 rounded-full">
                 <Image 
-                  src="/candid-minds-logo.png" 
-                  alt="Candid Minds" 
+                  src="/chakrigo-logo.png" 
+                  alt="ChakriGO Logo" 
                   width={42} 
                   height={42}
                   className="rounded-full bg-gray-900" 
@@ -181,8 +181,8 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
                 className="flex-1"
               > 
                 <h2 className="text-lg font-bold tracking-wide select-none">
-                  <span className="text-primary-100">Candid</span>
-                  <span className="text-white">Minds</span>
+                  <span className="text-primary-100">Chakri</span>
+                  <span className="text-white">GO</span>
                 </h2>
               </motion.div>
             )}

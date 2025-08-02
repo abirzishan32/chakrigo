@@ -9,12 +9,12 @@ export async function generateMetadata({ params }: { params: { snippetId: string
   
   if (!success || !snippet) {
     return {
-      title: "Snippet Not Found | Candid Minds",
+      title: "Snippet Not Found | ChakriGO",
     };
   }
   
   return {
-    title: `Edit ${snippet.title} | Code Snippets | Candid Minds`,
+    title: `Edit ${snippet.title} | Code Snippets | ChakriGO`,
   };
 }
 

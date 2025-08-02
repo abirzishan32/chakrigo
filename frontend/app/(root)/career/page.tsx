@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 export const metadata = {
-  title: "Interview Experiences | Candid Minds",
+  title: "Interview Experiences | ChakriGO",
   description: "Share and read anonymous interview experiences from different IT companies",
 };
 
