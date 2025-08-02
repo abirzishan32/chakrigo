@@ -118,11 +118,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                 );
               })}
             </nav>
-            <div className="p-4 border-t border-gray-700">
-              <div className="text-sm text-gray-400">
-                © 2024 ChakriGO. All rights reserved.
-              </div>
-            </div>
           </div>
         </div>
 
