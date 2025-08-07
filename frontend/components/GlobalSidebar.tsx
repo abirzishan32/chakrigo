@@ -80,14 +80,6 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
       pulse: false
     },
     {
-      href: "/leetcode-qna",
-      icon: <Zap size={20} />,
-      label: "LeetCode QnA",
-      id: "leetcode-qna",
-      pulse: true,
-      new: true
-    },
-    {
       href: "/career",
       icon: <Users size={20} />,
       label: "Community",
@@ -108,13 +100,7 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
       id: "code-snippet",
       pulse: false
     },
-    {
-      href: "/ai-animation",
-      icon: <BrainCog size={20} />,
-      label: "AI Algorithm Animation",
-      id: "ai-animation",
-      pulse: false
-    },
+
     {
       href: "/system-design",
       icon: <BrainCog size={20} />,
@@ -211,7 +197,6 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
                 collapsed={isSidebarCollapsed}
                 active={link.id === activeSection}
                 pulse={link.pulse}
-                isNew={link.new}
               />
             ))}
 

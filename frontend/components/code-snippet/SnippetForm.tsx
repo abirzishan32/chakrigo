@@ -88,67 +88,99 @@ export default function SnippetForm({ snippet, folderId, onCancel }: SnippetForm
   };
   
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="title">Title</Label>
-        <Input
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Snippet title"
-          className="mt-1"
-        />
-      </div>
-      
-      <div>
-        <Label htmlFor="description">Description (optional)</Label>
-        <Textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Brief description of the code snippet"
-          className="mt-1 h-24"
-        />
-      </div>
-      
-      <div>
-        <Label>Tags (optional)</Label>
-        <TagInput 
-          value={tags} 
-          onChange={setTags} 
-          placeholder="Add tags and press Enter"
-          className="mt-1"
-        />
-      </div>
-      
-      <div>
-        <Label>Code</Label>
-        <div className="mt-1">
-          <CodeEditor
-            code={code}
-            language={language}
-            onChange={setCode}
-            onLanguageChange={setLanguage}
-            onSave={handleSubmit}
-          />
+    <div className="h-full flex flex-col overflow-hidden">
+      <form onSubmit={handleSubmit} className="h-full flex flex-col overflow-hidden">
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {/* Form Fields Section */}
+          <div className="space-y-4">
+            {/* Title and Tags Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Label htmlFor="title" className="text-sm font-medium">
+                  Title <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Enter snippet title"
+                  className="h-9"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-1">
+                <Label className="text-sm font-medium">Tags</Label>
+                <TagInput 
+                  value={tags} 
+                  onChange={setTags} 
+                  placeholder="Add tags..."
+                  className="h-9"
+                />
+              </div>
+            </div>
+            
+            {/* Description */}
+            <div className="space-y-1">
+              <Label htmlFor="description" className="text-sm font-medium">Description</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Brief description of the code snippet (optional)"
+                className="h-20 resize-none"
+                rows={3}
+              />
+            </div>
+          </div>
+          
+          {/* Code Editor Section */}
+          <div className="space-y-1">
+            <Label className="text-sm font-medium">
+              Code <span className="text-red-500">*</span>
+            </Label>
+            <div className="h-80 border rounded-md overflow-hidden">
+              <CodeEditor
+                code={code}
+                language={language}
+                onChange={setCode}
+                onLanguageChange={setLanguage}
+                onSave={handleSubmit}
+              />
+            </div>
+          </div>
         </div>
-      </div>
-      
-      <div className="flex justify-end space-x-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isSaving}>
-          {isSaving ? (
-            <>
-              <span className="mr-1">{isEditing ? "Updating..." : "Creating..."}</span>
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-            </>
-          ) : (
-            isEditing ? "Update Snippet" : "Create Snippet"
-          )}
-        </Button>
-      </div>
-    </form>
+        
+        {/* Fixed Action Buttons */}
+        <div className="flex-shrink-0 border-t bg-background p-4">
+          <div className="flex justify-end space-x-3">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onCancel}
+              disabled={isSaving}
+              className="px-4"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isSaving || !title.trim() || !code.trim()}
+              className="px-6"
+            >
+              {isSaving ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  {isEditing ? "Updating..." : "Creating..."}
+                </>
+              ) : (
+                isEditing ? "Update Snippet" : "Create Snippet"
+              )}
+            </Button>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 }

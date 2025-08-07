@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import FileExplorer from "@/components/code-snippet/FileExplorer";
+import FileExplorerWrapper from "@/components/code-snippet/FileExplorerWrapper";
 import { Button } from "@/components/ui/button";
-import { Plus, FileCode } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Plus, Code, FolderOpen, Sparkles, BookOpen, Link } from "lucide-react";
 
 export default function CodeSnippetsPage() {
   const router = useRouter();
@@ -16,60 +16,97 @@ export default function CodeSnippetsPage() {
       router.push("/code-snippet/new");
     }
   };
-
   return (
-    <div className="container mx-auto py-6 max-w-6xl">
-      <h1 className="text-2xl font-bold mb-2">My Code Snippets</h1>
-      <p className="text-muted-foreground mb-6">
-        Store and organize your code snippets in folders. Click on a snippet to view it.
-      </p>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* File Explorer */}
-        <div className="lg:col-span-4">
-          <FileExplorer 
-            initialFolderId={null} 
-            onCreateSnippet={handleCreateSnippet} 
-          />
-        </div>
-        
-        {/* Welcome area */}
-        <div className="lg:col-span-8">
-          <div className="border rounded-md p-8 text-center flex flex-col items-center justify-center min-h-[400px] bg-background">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-              <FileCode size={32} className="text-primary" />
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
+        {/* Modern Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Code className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Code Snippets</h1>
+                <p className="text-muted-foreground mt-1">
+                  Organize and manage your code snippets efficiently
+                </p>
+              </div>
             </div>
             
-            <h2 className="text-xl font-medium mb-2">Welcome to Code Snippets</h2>
-            <p className="text-muted-foreground mb-6 max-w-md">
-              Create and organize your code snippets in folders. Click on a snippet to view it, 
-              or create a new snippet to get started.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button 
-                size="lg"
-                onClick={() => router.push("/code-snippet/new")}
-                className="flex items-center"
-              >
-                <Plus size={18} className="mr-1" />
-                Create New Snippet
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/code-snippet/new">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Snippet
+                </Link>
               </Button>
-              
-              <Button 
-                size="lg"
-                variant="outline"
-                onClick={() => {
-                  const el = document.querySelector('[title="Create new folder"]');
-                  if (el && el instanceof HTMLElement) {
-                    el.click();
-                  }
-                }}
-                className="flex items-center"
-              >
-                <Plus size={18} className="mr-1" />
-                Create New Folder
-              </Button>
+            </div>
+          </div>
+          
+          {/* Quick Stats Cards */}
+          
+        </div>
+
+        {/* Main Content Area */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* File Explorer - Takes up 2 columns on large screens */}
+          <div className="lg:col-span-2">
+            <div className="bg-card border rounded-lg shadow-sm">
+              <div className="border-b bg-muted/30 px-4 py-3">
+                <h2 className="font-semibold text-lg flex items-center gap-2">
+                  <FolderOpen className="h-5 w-5" />
+                  File Explorer
+                </h2>
+              </div>
+              <div className="p-4">
+                <FileExplorerWrapper 
+                  initialFolderId={null}
+                  targetPath="/code-snippet/new"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar - Quick Actions & Tips */}
+          <div className="space-y-6">
+            {/* Quick Actions Card */}
+            <div className="bg-card border rounded-lg shadow-sm">
+              <div className="border-b bg-muted/30 px-4 py-3">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  Quick Actions
+                </h3>
+              </div>
+              <div className="p-4 space-y-3">
+                <Button asChild className="w-full justify-start" variant="outline">
+                  <Link href="/code-snippet/new">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create New Snippet
+                  </Link>
+                </Button>
+                
+                <Button asChild className="w-full justify-start" variant="outline">
+                  <Link href="/code-snippet/new">
+                    <FolderOpen className="h-4 w-4 mr-2" />
+                    Create New Folder
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+       
+
+
+            <div className="bg-card border rounded-lg shadow-sm">
+              <div className="border-b bg-muted/30 px-4 py-3">
+                <h3 className="font-semibold">Recent Activity</h3>
+              </div>
+              <div className="p-4">
+                <p className="text-sm text-muted-foreground text-center py-6">
+                  No recent activity yet
+                </p>
+              </div>
             </div>
           </div>
         </div>

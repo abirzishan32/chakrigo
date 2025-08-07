@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Save, Copy, X } from "lucide-react";
+import { Save, Copy } from "lucide-react";
 import { toast } from "sonner";
 
 // Import the Monaco Editor dynamically to avoid SSR issues
@@ -42,7 +42,7 @@ interface CodeEditorProps {
     onChange: (code: string) => void;
     onLanguageChange: (language: string) => void;
     readOnly?: boolean;
-    onSave?: (e?: React.FormEvent) => void; // Updated to accept an optional event parameter
+    onSave?: (e?: React.FormEvent) => void;
 }
 
 export default function CodeEditor({
@@ -82,17 +82,18 @@ export default function CodeEditor({
 
     if (!mounted) {
         return (
-            <div className="h-[400px] border rounded-md flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-                Loading editor...
+            <div className="h-full border rounded-md flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                <div className="text-sm text-muted-foreground">Loading editor...</div>
             </div>
         );
     }
 
     return (
         <div className="flex flex-col h-full">
-            <div className="flex justify-between items-center mb-2 gap-2">
-                <Select value={language} onValueChange={onLanguageChange}>
-                    <SelectTrigger className="w-40">
+            {/* Editor Controls - Compact */}
+            <div className="flex justify-between items-center p-2 border-b bg-muted/30 flex-shrink-0">
+                <Select value={language} onValueChange={onLanguageChange} disabled={readOnly}>
+                    <SelectTrigger className="w-36 h-8 text-xs">
                         <SelectValue placeholder="Language" />
                     </SelectTrigger>
                     <SelectContent>
@@ -104,31 +105,35 @@ export default function CodeEditor({
                     </SelectContent>
                 </Select>
 
-                <div className="flex gap-2">
+                <div className="flex gap-1">
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={handleCopy}
                         title="Copy code"
+                        className="h-8 px-2 text-xs"
                     >
-                        <Copy size={16} className="mr-1" />
+                        <Copy size={12} className="mr-1" />
                         Copy
                     </Button>
 
                     {onSave && !readOnly && (
                         <Button
+                            variant="ghost"
                             size="sm"
-                            onClick={handleSave} // Use the new handler
+                            onClick={handleSave}
                             title="Save changes"
+                            className="h-8 px-2 text-xs"
                         >
-                            <Save size={16} className="mr-1" />
+                            <Save size={12} className="mr-1" />
                             Save
                         </Button>
                     )}
                 </div>
             </div>
 
-            <div className="h-[400px] border rounded-md overflow-hidden">
+            {/* Monaco Editor - Takes remaining space */}
+            <div className="flex-1 overflow-hidden">
                 <MonacoEditor
                     height="100%"
                     language={language}
@@ -142,6 +147,20 @@ export default function CodeEditor({
                         scrollBeyondLastLine: false,
                         automaticLayout: true,
                         tabSize: 2,
+                        lineNumbers: "on",
+                        renderWhitespace: "none",
+                        padding: { top: 10, bottom: 10 },
+                        lineDecorationsWidth: 0,
+                        lineNumbersMinChars: 3,
+                        glyphMargin: false,
+                        folding: false,
+                        // Optimize for smaller screens
+                        scrollbar: {
+                            vertical: "auto",
+                            horizontal: "auto",
+                            verticalSliderSize: 8,
+                            horizontalSliderSize: 8,
+                        },
                     }}
                     theme="vs-dark"
                 />
