@@ -42,7 +42,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { useAuth } from "@/lib/hooks/useAuth";
 
 // Animated score circle component
 function ScoreCircle({ score, size = 120, strokeWidth = 8, label }) {
@@ -102,7 +101,7 @@ function ScoreCircle({ score, size = 120, strokeWidth = 8, label }) {
     );
 }
 
-// Section analysis component
+// Section analysis component - Updated to handle both formats
 function SectionAnalysis({ section, index }) {
     const getScoreColor = (score) => {
         if (score >= 80) return "text-green-600";
@@ -122,13 +121,11 @@ function SectionAnalysis({ section, index }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
         >
-            {" "}
             <Card className="h-full hover:shadow-lg transition-all duration-300 border-0 shadow-md bg-white dark:bg-gray-800">
                 <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                        {" "}
-                        <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-                            {section.sectionName}
+                        <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-100 capitalize">
+                            {section.sectionName || section.name}
                         </CardTitle>
                         <div
                             className={`px-3 py-1 rounded-full border ${getScoreBg(
@@ -163,21 +160,35 @@ function SectionAnalysis({ section, index }) {
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {section.issues && section.issues.length > 0 && (
+                    {/* Display feedback as general info if available */}
+                    {section.feedback && (
                         <div>
-                            {" "}
+                            <h4 className="font-semibold text-blue-600 dark:text-blue-300 flex items-center mb-3 text-base">
+                                <Eye size={16} className="mr-2" />
+                                Analysis
+                            </h4>
+                            <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
+                                {section.feedback}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Handle both issues array and improvements array */}
+                    {((section.issues && section.issues.length > 0) || 
+                      (section.improvements && section.improvements.length > 0)) && (
+                        <div>
                             <h4 className="font-semibold text-red-600 dark:text-red-300 flex items-center mb-3 text-base">
                                 <XCircle size={16} className="mr-2" />
-                                Issues Found
+                                {section.issues ? "Issues Found" : "Areas for Improvement"}
                             </h4>
                             <ul className="space-y-2">
-                                {section.issues.map((issue, idx) => (
+                                {(section.issues || section.improvements || []).map((item, idx) => (
                                     <li
                                         key={idx}
                                         className="text-sm text-gray-700 dark:text-gray-200 flex items-start leading-relaxed"
                                     >
                                         <span className="w-1.5 h-1.5 bg-red-400 rounded-full mt-2 mr-3 flex-shrink-0" />
-                                        {issue}
+                                        {item}
                                     </li>
                                 ))}
                             </ul>
@@ -187,7 +198,6 @@ function SectionAnalysis({ section, index }) {
                     {section.recommendations &&
                         section.recommendations.length > 0 && (
                             <div>
-                                {" "}
                                 <h4 className="font-semibold text-blue-600 dark:text-blue-300 flex items-center mb-3 text-base">
                                     <Lightbulb size={16} className="mr-2" />
                                     Recommendations
@@ -310,7 +320,6 @@ function ParsedDataDisplay({ parsedData }) {
         } else if (typeof data === "object" && data !== null) {
             return (
                 <div className="space-y-3">
-                    {" "}
                     {Object.entries(data).map(([key, value]) => (
                         <div key={key}>
                             <span className="font-medium text-gray-600 dark:text-gray-300 capitalize text-base">
@@ -333,18 +342,17 @@ function ParsedDataDisplay({ parsedData }) {
     return (
         <div className="max-h-[70vh] overflow-y-auto">
             {renderSection(
-                "Contact Information",
-                parsedData.contactInfo,
+                "Basic Information",
+                {
+                    name: parsedData.name,
+                    email: parsedData.email,
+                    phone: parsedData.phone
+                },
                 <User className="mr-2" size={20} />
             )}
             {renderSection(
-                "Professional Summary",
-                parsedData.professionalSummary,
-                <FileText className="mr-2" size={20} />
-            )}
-            {renderSection(
                 "Work Experience",
-                parsedData.workExperience,
+                parsedData.experience,
                 <Briefcase className="mr-2" size={20} />
             )}
             {renderSection(
@@ -358,24 +366,14 @@ function ParsedDataDisplay({ parsedData }) {
                 <Code className="mr-2" size={20} />
             )}
             {renderSection(
-                "Certifications",
-                parsedData.certifications,
-                <Award className="mr-2" size={20} />
-            )}
-            {renderSection(
-                "Languages",
-                parsedData.languages,
-                <Star className="mr-2" size={20} />
+                "Projects",
+                parsedData.projects,
+                <Code className="mr-2" size={20} />
             )}
             {renderSection(
                 "Achievements",
                 parsedData.achievements,
                 <Trophy className="mr-2" size={20} />
-            )}
-            {renderSection(
-                "Projects",
-                parsedData.projects,
-                <Code className="mr-2" size={20} />
             )}
         </div>
     );
@@ -401,6 +399,7 @@ function ResumeAnalysisDetailPage() {
             setLoading(true);
             const response = await fetch(`/api/resume-analysis/${id}`);
             const result = await response.json();
+            console.log("Fetched analysis:", result.data);
 
             if (response.ok) {
                 setAnalysis(result.data);
@@ -417,7 +416,21 @@ function ResumeAnalysisDetailPage() {
         }
     };
 
-    if (!loading) {
+    // Convert analysis object to sections array for display
+    const getSectionsArray = () => {
+        if (!analysis?.analysis) return [];
+        
+        return Object.entries(analysis.analysis).map(([key, value]) => ({
+            sectionName: key,
+            score: value.score || 0,
+            feedback: value.feedback || "",
+            issues: [], // Current API doesn't have issues
+            recommendations: value.improvements || [],
+            ...value
+        }));
+    };
+
+    if (loading) {
         return (
             <div className="flex justify-center items-center min-h-screen">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
@@ -433,7 +446,7 @@ function ResumeAnalysisDetailPage() {
                         <AlertCircle
                             size={48}
                             className="mx-auto text-red-500 mb-4"
-                        />{" "}
+                        />
                         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
                             Analysis Not Found
                         </h1>
@@ -450,6 +463,8 @@ function ResumeAnalysisDetailPage() {
             </div>
         );
     }
+
+    const sectionsArray = getSectionsArray();
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -488,7 +503,8 @@ function ResumeAnalysisDetailPage() {
                                     Export
                                 </Button>
                             </div>
-                        </motion.div>{" "}
+                        </motion.div>
+
                         {/* Title Section */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -534,7 +550,8 @@ function ResumeAnalysisDetailPage() {
                                         />
                                     </DialogContent>
                                 </Dialog>
-                            </div>{" "}
+                            </div>
+
                             <div className="flex items-center text-gray-500 dark:text-gray-300 gap-4">
                                 <div className="flex items-center">
                                     <Calendar size={16} className="mr-1" />
@@ -550,6 +567,7 @@ function ResumeAnalysisDetailPage() {
                                 </div>
                             </div>
                         </motion.div>
+
                         {/* Overview Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                             <motion.div
@@ -557,7 +575,6 @@ function ResumeAnalysisDetailPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, delay: 0.2 }}
                             >
-                                {" "}
                                 <Card className="text-center h-full dark:bg-gray-800">
                                     <CardHeader>
                                         <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-100">
@@ -572,12 +589,12 @@ function ResumeAnalysisDetailPage() {
                                     </CardContent>
                                 </Card>
                             </motion.div>
+
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, delay: 0.3 }}
                             >
-                                {" "}
                                 <Card className="text-center h-full dark:bg-gray-800">
                                     <CardHeader>
                                         <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-100">
@@ -588,44 +605,41 @@ function ResumeAnalysisDetailPage() {
                                         <ScoreCircle
                                             score={
                                                 analysis?.jobFitAnalysis
-                                                    ?.matchScore || 0
+                                                    ?.matchPercentage || 0
                                             }
                                             label="Match"
                                         />
                                     </CardContent>
                                 </Card>
-                            </motion.div>{" "}
+                            </motion.div>
+
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, delay: 0.4 }}
                             >
-                                {" "}
                                 <Card className="h-full flex flex-col dark:bg-gray-800">
                                     <CardHeader>
                                         <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-100">
                                             Quick Stats
                                         </CardTitle>
-                                    </CardHeader>{" "}
+                                    </CardHeader>
                                     <CardContent className="flex-1 flex flex-col justify-center space-y-4">
-                                        {" "}
                                         <div className="flex justify-between items-center py-2">
                                             <span className="text-gray-700 dark:text-gray-100 text-base font-medium">
                                                 Sections Analyzed
                                             </span>
                                             <span className="font-semibold text-xl text-gray-900 dark:text-gray-50">
-                                                {analysis?.analysis?.length ||
-                                                    0}
+                                                {sectionsArray?.length || 0}
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center py-2">
                                             <span className="text-gray-700 dark:text-gray-100 text-base font-medium">
-                                                Missing Keywords
+                                                Key Gaps
                                             </span>
                                             <span className="font-semibold text-xl text-red-600 dark:text-red-300">
                                                 {analysis?.jobFitAnalysis
-                                                    ?.missingKeywords?.length ||
-                                                    0}
+                                                    ?.gaps?.length || 0}
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center py-2">
@@ -641,6 +655,7 @@ function ResumeAnalysisDetailPage() {
                                 </Card>
                             </motion.div>
                         </div>
+
                         {/* Summary Section */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -648,7 +663,6 @@ function ResumeAnalysisDetailPage() {
                             transition={{ duration: 0.6, delay: 0.5 }}
                             className="mb-8"
                         >
-                            {" "}
                             <Card className="pt-0 hover:shadow-lg transition-all duration-300 border-0 shadow-md bg-white dark:bg-gray-800">
                                 <CardHeader className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-gray-700 dark:to-gray-600 rounded-t-lg pt-2">
                                     <CardTitle className="flex items-center text-gray-800 dark:text-gray-100 py-2">
@@ -658,7 +672,7 @@ function ResumeAnalysisDetailPage() {
                                         />
                                         Executive Summary
                                     </CardTitle>
-                                </CardHeader>{" "}
+                                </CardHeader>
                                 <CardContent className="pt-6">
                                     <p className="text-gray-700 dark:text-gray-100 leading-relaxed text-base font-medium">
                                         {analysis?.summary}
@@ -666,6 +680,7 @@ function ResumeAnalysisDetailPage() {
                                 </CardContent>
                             </Card>
                         </motion.div>
+
                         {/* Job Fit Analysis */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -673,7 +688,6 @@ function ResumeAnalysisDetailPage() {
                             transition={{ duration: 0.6, delay: 0.6 }}
                             className="mb-8"
                         >
-                            {" "}
                             <Card className="pt-0 hover:shadow-lg transition-all duration-300 border-0 shadow-md bg-white dark:bg-gray-800">
                                 <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded-t-lg pt-2">
                                     <CardTitle className="flex items-center text-gray-800 dark:text-gray-200 py-2">
@@ -686,7 +700,6 @@ function ResumeAnalysisDetailPage() {
                                 </CardHeader>
                                 <CardContent className="pt-6">
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                        {" "}
                                         {/* Strengths */}
                                         <div>
                                             <h4 className="font-semibold text-green-600 dark:text-green-300 flex items-center mb-3 text-base">
@@ -719,7 +732,8 @@ function ResumeAnalysisDetailPage() {
                                                 )}
                                             </div>
                                         </div>
-                                        {/* Weaknesses */}
+
+                                        {/* Gaps/Weaknesses */}
                                         <div>
                                             <h4 className="font-semibold text-red-600 dark:text-red-300 flex items-center mb-3 text-base">
                                                 <XCircle
@@ -729,8 +743,8 @@ function ResumeAnalysisDetailPage() {
                                                 Areas for Improvement
                                             </h4>
                                             <div className="space-y-2">
-                                                {analysis?.jobFitAnalysis?.weaknesses?.map(
-                                                    (weakness, index) => (
+                                                {analysis?.jobFitAnalysis?.gaps?.map(
+                                                    (gap, index) => (
                                                         <div
                                                             key={index}
                                                             className="flex items-start"
@@ -740,50 +754,51 @@ function ResumeAnalysisDetailPage() {
                                                                 className="text-red-500 mr-2 mt-0.5 flex-shrink-0"
                                                             />
                                                             <span className="text-sm text-gray-700 dark:text-gray-200 font-medium">
-                                                                {weakness}
+                                                                {gap}
                                                             </span>
                                                         </div>
                                                     )
                                                 ) || (
                                                     <p className="text-gray-500 dark:text-gray-400">
-                                                        No weaknesses identified
+                                                        No gaps identified
                                                     </p>
                                                 )}
                                             </div>
                                         </div>
                                     </div>
 
-                                    {analysis?.jobFitAnalysis?.missingKeywords
-                                        ?.length > 0 && (
+                                    {/* Recommendations */}
+                                    {analysis?.jobFitAnalysis?.recommendations?.length > 0 && (
                                         <>
-                                            <Separator className="my-6" />{" "}
+                                            <Separator className="my-6" />
                                             <div>
-                                                <h4 className="font-semibold text-orange-600 dark:text-orange-300 flex items-center mb-3 text-base">
-                                                    <AlertCircle
+                                                <h4 className="font-semibold text-blue-600 dark:text-blue-300 flex items-center mb-3 text-base">
+                                                    <Lightbulb
                                                         size={16}
                                                         className="mr-2"
                                                     />
-                                                    Missing Keywords
+                                                    Recommendations
                                                 </h4>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {analysis.jobFitAnalysis.missingKeywords.map(
-                                                        (keyword, index) => (
-                                                            <Badge
+                                                <ul className="space-y-2">
+                                                    {analysis.jobFitAnalysis.recommendations.map(
+                                                        (rec, index) => (
+                                                            <li
                                                                 key={index}
-                                                                variant="outline"
-                                                                className="text-orange-600 dark:text-orange-500 text-sm border-orange-200"
+                                                                className="text-sm text-gray-700 dark:text-gray-200 flex items-start"
                                                             >
-                                                                {keyword}
-                                                            </Badge>
+                                                                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0" />
+                                                                {rec}
+                                                            </li>
                                                         )
                                                     )}
-                                                </div>
+                                                </ul>
                                             </div>
                                         </>
                                     )}
                                 </CardContent>
                             </Card>
                         </motion.div>
+
                         {/* Section Analysis */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -791,12 +806,11 @@ function ResumeAnalysisDetailPage() {
                             transition={{ duration: 0.6, delay: 0.7 }}
                             className="mb-8"
                         >
-                            {" "}
                             <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
                                 Section-by-Section Analysis
                             </h2>
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                {analysis?.analysis?.map((section, index) => (
+                                {sectionsArray?.map((section, index) => (
                                     <SectionAnalysis
                                         key={index}
                                         section={section}

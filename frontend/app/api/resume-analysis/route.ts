@@ -1,14 +1,13 @@
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { ResumeAnalysisSchema } from "@/schemas/ResumeAnalysisSchema";
 import { db } from "@/firebase/admin";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 
 export const config = { api: { bodyParser: false } };
-const ai = new OpenAI({
-    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-    baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
-});
+
+// Initialize Google Generative AI
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY!);
 
 const SYSTEM_PROMPT = `
 You are an expert resume analyzer with 10+ years of HR and recruitment experience. 
@@ -47,41 +46,74 @@ provide detailed feedback for improvement. Consider these key criteria:
 
 Provide specific, actionable recommendations for each issue found.
 Prioritize feedback based on impact on hiring chances.
+
+Return your analysis in the following JSON format:
+{
+  "summary": "Brief overall assessment of the resume",
+  "overallScore": 85,
+  "jobFitAnalysis": {
+    "matchPercentage": 75,
+    "strengths": ["Strong technical skills", "Relevant experience"],
+    "gaps": ["Missing cloud experience", "No leadership examples"],
+    "recommendations": ["Add cloud certifications", "Include team leadership examples"]
+  },
+  "parsedContent": {
+    "name": "John Doe",
+    "email": "john@email.com",
+    "phone": "+1234567890",
+    "experience": [...],
+    "education": [...],
+    "skills": [...]
+  },
+  "sections": {
+    "experience": {
+      "score": 80,
+      "feedback": "Strong work experience section",
+      "improvements": ["Add more quantifiable achievements"]
+    },
+    "education": {
+      "score": 90,
+      "feedback": "Good educational background",
+      "improvements": []
+    },
+    "skills": {
+      "score": 75,
+      "feedback": "Relevant skills listed",
+      "improvements": ["Add more specific technical skills"]
+    }
+  }
+}
 `;
 
-export async function POST(req) {
+export async function POST(req: Request) {
     const user = await getCurrentUser();
     if (!user) {
-        return new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401,
-        });
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     try {
         const formData = await req.formData();
-        const file = formData.get("resume");
-        const targetRole = formData.get("targetRole");
-        const targetDescription = formData.get("targetDescription");
+        const file = formData.get("resume") as File;
+        const targetRole = formData.get("targetRole") as string;
+        const targetDescription = formData.get("targetDescription") as string;
 
         if (!file) {
-            return new Response(JSON.stringify({ error: "No file uploaded" }), {
-                status: 400,
-            });
+            return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
         }
         if (!targetRole || !targetDescription) {
-            return new Response(
-                JSON.stringify({
-                    error: "Job title and description are required",
-                }),
-                { status: 400 }
-            );
+            return NextResponse.json({
+                error: "Job title and description are required",
+            }, { status: 400 });
         }
 
-        // Read file as base64
+        // Convert file to base64
         const arrayBuffer = await file.arrayBuffer();
         const base64 = Buffer.from(arrayBuffer).toString("base64");
+        const mimeType = file.type || "application/pdf";
 
         const userPrompt = `
+        ${SYSTEM_PROMPT}
+
         Analyze this resume for a ${targetRole} position with the following job description:
         ${targetDescription}
 
@@ -96,52 +128,80 @@ export async function POST(req) {
         Focus particularly on:
         - Relevance to ${targetRole} role
         - Quantifiable achievements
-        - Skills match to: ${targetDescription.substring(0, 100)}...
+        - Skills match to: ${targetDescription.substring(0, 200)}...
         - Formatting and structure
         
-        Some additional context:
-        - The current date is ${new Date().toISOString()}
+        Current date: ${new Date().toISOString()}
         `;
 
-        const response = await ai.chat.completions.create({
-            model: "gemini-2.5-flash-preview-04-17",
-            messages: [
-                { role: "system", content: SYSTEM_PROMPT },
-                {
-                    role: "user",
-                    content: [
-                        {
-                            type: "text",
-                            text: userPrompt,
-                        },
-                        {
-                            type: "image_url",
-                            image_url: {
-                                url: `data:application/pdf;base64,${base64}`,
-                            },
-                        },
-                    ],
-                },
-            ],
-            response_format: {
-                type: "json_schema",
-                json_schema: {
-                    name: "resume_analysis",
-                    schema: ResumeAnalysisSchema,
-                    strict: true,
-                },
-            },
+        // Use Gemini Pro Vision model for document analysis
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-flash",
+            generationConfig: {
+                temperature: 0.1,
+                topK: 1,
+                topP: 1,
+            }
         });
 
-        if (!response || !response.choices || response.choices.length === 0) {
-            return new Response(
-                JSON.stringify({ error: "Failed to analyze resume" }),
-                { status: 500 }
-            );
+        const imagePart = {
+            inlineData: {
+                data: base64,
+                mimeType: mimeType,
+            },
+        };
+
+        const result = await model.generateContent([userPrompt, imagePart]);
+        const response = await result.response;
+        const text = response.text();
+
+        // Parse the JSON response
+        let parsedContent;
+        try {
+            // Clean the response text (remove any markdown formatting)
+            const cleanedText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            parsedContent = JSON.parse(cleanedText);
+        } catch (parseError) {
+            console.error("Error parsing AI response:", parseError);
+            console.log("Raw response:", text);
+            
+            // Fallback response structure
+            parsedContent = {
+                summary: "Resume analysis completed but response format needs adjustment",
+                overallScore: 70,
+                jobFitAnalysis: {
+                    matchPercentage: 65,
+                    strengths: ["Professional experience", "Educational background"],
+                    gaps: ["Analysis needs refinement"],
+                    recommendations: ["Please try uploading again for detailed analysis"]
+                },
+                parsedContent: {
+                    name: "Unable to extract",
+                    email: "Unable to extract",
+                    phone: "Unable to extract",
+                    experience: [],
+                    education: [],
+                    skills: []
+                },
+                sections: {
+                    experience: {
+                        score: 70,
+                        feedback: "Analysis in progress",
+                        improvements: ["Please resubmit for detailed feedback"]
+                    },
+                    education: {
+                        score: 70,
+                        feedback: "Analysis in progress",
+                        improvements: []
+                    },
+                    skills: {
+                        score: 70,
+                        feedback: "Analysis in progress",
+                        improvements: ["Please resubmit for detailed feedback"]
+                    }
+                }
+            };
         }
-        //console.log("Raw API response:", response.choices[0].message.content);
-        const parsedContent = JSON.parse(response.choices[0].message.content);
-        //console.log("Parsed content:", parsedContent);
 
         // Save analysis to Firestore
         const analysisData = {
@@ -149,10 +209,12 @@ export async function POST(req) {
             targetRole: targetRole,
             description: targetDescription,
             summary: parsedContent.summary || "No summary provided",
-            overallScore: parsedContent.overallScore,
-            jobFitAnalysis: parsedContent.jobFitAnalysis,
-            parsedData: parsedContent.parsedContent,
-            analysis: parsedContent.sections,
+            overallScore: parsedContent.overallScore || 0,
+            jobFitAnalysis: parsedContent.jobFitAnalysis || {},
+            parsedData: parsedContent.parsedContent || {},
+            analysis: parsedContent.sections || {},
+            createdAt: new Date(),
+            updatedAt: new Date()
         };
 
         const docRef = await db.collection('resumeAnalyses').add(analysisData);
@@ -169,20 +231,32 @@ export async function POST(req) {
             ...analysisData
         };
 
+        return NextResponse.json({
+            message: "Resume analysis completed successfully",
+            data: savedAnalysis,
+        }, { status: 200 });
+
+    } catch (error) {
+        console.error("Resume analysis error:", error);
+        
+        // More specific error handling
+        if (error.message?.includes('API key')) {
+            return NextResponse.json(
+                { error: "API configuration error. Please check your settings." },
+                { status: 500 }
+            );
+        }
+        
+        if (error.message?.includes('quota')) {
+            return NextResponse.json(
+                { error: "API quota exceeded. Please try again later." },
+                { status: 429 }
+            );
+        }
+
         return NextResponse.json(
-            {
-                message: "Resume analysis completed successfully",
-                data: savedAnalysis,
-            },
-            { status: 200 }
-        );
-    } catch (e) {
-        console.error(e);
-        return NextResponse.json(
-            { error: e.message },
-            {
-                status: 500,
-            }
+            { error: error.message || "Failed to analyze resume" },
+            { status: 500 }
         );
     }
 }

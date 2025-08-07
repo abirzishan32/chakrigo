@@ -2,8 +2,12 @@ import { db } from "@/firebase/admin";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 import { NextResponse } from "next/server";
 
+
 // GET endpoint - fetch specific resume analysis by ID
-export async function GET(request, { params }) {
+export async function GET(
+    request: Request, 
+    { params }: { params: { id: string } }
+) {
     try {
         const user = await getCurrentUser();
         if (!user) {
@@ -13,7 +17,7 @@ export async function GET(request, { params }) {
             );
         }
 
-        const { id } = params;
+        const { id } = await params;
 
         if (!id) {
             return NextResponse.json(
@@ -22,9 +26,9 @@ export async function GET(request, { params }) {
             );
         }
 
-        // Fetch the specific analysis
+        // Fixed: Use the correct collection name 'resumeAnalyses'
         const analysis = await db
-            .collection("resume_analyses")
+            .collection("resumeAnalyses") 
             .doc(id)
             .get();
 
@@ -35,15 +39,23 @@ export async function GET(request, { params }) {
             );
         }
 
+        const analysisData = analysis.data();
+
         // Verify the analysis belongs to the current user
-        if (analysis.data().userId !== user.id) {
+        if (!analysisData || analysisData.userId !== user.id) {
             return NextResponse.json(
                 { error: "Unauthorized access to this analysis" },
                 { status: 403 }
             );
         }
 
-        return NextResponse.json({ data: analysis.data() }, { status: 200 });
+        // Return the data with the document ID included
+        return NextResponse.json({ 
+            data: {
+                id: analysis.id,
+                ...analysisData
+            }
+        }, { status: 200 });
     } catch (error) {
         console.error("Error fetching analysis:", error);
         return NextResponse.json(

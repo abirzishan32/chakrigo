@@ -14,11 +14,13 @@ import {
   ChevronLeft, 
   Settings,
   HelpCircle,
-  Zap,
+  ScanText,
   Activity,
   LogOut,
   Code,
-  BrainCog
+  File,
+  BrainCog,
+  FileEdit
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -74,9 +76,16 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
     },
     {
       href: "/resume-builder",
-      icon: <FileText size={20} />,
+      icon: <FileEdit size={20} />,
       label: "Resume Builder",
       id: "resume-builder",
+      pulse: false
+    },
+    {
+      href: "/resume-analyzer",
+      icon: <ScanText size={20} />,
+      label: "Resume Analyzer",
+      id: "resume-analyzer",
       pulse: false
     },
     {
