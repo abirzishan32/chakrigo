@@ -2,7 +2,7 @@
 
 import { format } from "date-fns";
 import Link from "next/link";
-import { Building, CalendarDays, Award, Users, MessageSquare, Share2, ThumbsUp, MoreHorizontal, Eye } from "lucide-react";
+import { Building, CalendarDays, Award, Users, MessageSquare, Share2, ThumbsUp, MoreHorizontal, Eye, Heart } from "lucide-react";
 import { CareerExperience, hasUserLikedV2, toggleLikeV2 } from "@/lib/actions/career-experience.action";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
@@ -227,7 +227,7 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
               onClick={handleToggleLike}
               disabled={isLoading}
             >
-              <ThumbsUp className={cn("h-4 w-4", liked && "fill-blue-400")} />
+              <Heart className={cn("h-4 w-4", liked && "fill-red-400")} />
               <span className="text-sm font-medium">{likeCount}</span>
             </button>
             
@@ -235,10 +235,7 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
               href={`/career/${experience.id}`}
               className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-400 hover:text-blue-400 hover:bg-blue-500/5 transition-all duration-200 hover:scale-105"
             >
-              <MessageSquare className="h-4 w-4" />
-              <span className="text-sm font-medium">
-                {experience.commentsCount || 0} comment{experience.commentsCount !== 1 ? 's' : ''}
-              </span>
+              
             </Link>
           </div>
           
