@@ -2,7 +2,7 @@
 
 A comprehensive, next-generation platform that revolutionizes career development through AI-powered interviews, resume optimization, skill assessments, and community-driven learning.
 
-![ChakriGO Banner](./app/public/images/chakrigo-logo.png)
+![ChakriGO Banner](frontend/public/chakrigo-logo.png)
 
 ## ✨ Features
 
