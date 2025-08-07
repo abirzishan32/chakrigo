@@ -92,7 +92,6 @@ const EyeTrackingProctor: React.FC<EyeTrackingProctorProps> = ({
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           setStreamActive(true);
-          toast.success('Webcam activated for assessment proctoring');
         }
       } catch (error) {
         console.error('Error accessing camera:', error);

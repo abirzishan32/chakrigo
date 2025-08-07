@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { getCurrentUser } from "@/lib/actions/auth.action";
+import { getCurrentUser, signOut } from "@/lib/actions/auth.action";
 import SignOutButton from '@/components/SignOutButton';
-import { 
-  Home, 
-  Users, 
-  FileText, 
-  Brain, 
-  Bot, 
-  ChevronRight, 
-  ChevronLeft, 
+import {
+  Home,
+  Users,
+  FileText,
+  Brain,
+  Bot,
+  ChevronRight,
+  ChevronLeft,
   Settings,
   HelpCircle,
   ScanText,
@@ -31,15 +31,17 @@ interface GlobalSidebarProps {
 
 const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps) => {
   const [user, setUser] = useState<any>(null);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const pathname = usePathname();
   const [activeSection, setActiveSection] = useState<string>("");
-  
+
+
   useEffect(() => {
     const fetchUser = async () => {
       const userData = await getCurrentUser();
       setUser(userData);
     };
-    
+
     fetchUser();
   }, []);
 
@@ -48,7 +50,7 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
     const path = pathname?.split('/')?.[1] || 'dashboard';
     setActiveSection(path);
   }, [pathname]);
-  
+
   const isUserAuth = !!user;
   const isModerator = user?.role === 'interview-moderator';
 
@@ -129,10 +131,12 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
     });
   }
 
+
+
   return (
-    <motion.div 
+    <motion.div
       initial={{ x: isSidebarCollapsed ? -50 : 0, opacity: 0.8 }}
-      animate={{ 
+      animate={{
         width: isSidebarCollapsed ? '80px' : '260px',
         x: 0,
         opacity: 1
@@ -144,14 +148,14 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
       <div className="absolute inset-0 opacity-5">
         <div className="neural-network-bg"></div>
       </div>
-      
+
       <div className="relative z-10 flex flex-col h-full">
         {/* Logo and collapse button */}
         <div className="flex items-center justify-between p-4 border-b border-gray-800/60 bg-gray-900/50 backdrop-blur-sm">
           <Link href="/" className={`flex items-center gap-3 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
-            <motion.div 
+            <motion.div
               className="relative overflow-hidden rounded-full"
-              animate={{ 
+              animate={{
                 scale: [1, 1.05, 1],
                 rotate: [0, 5, -5, 0]
               }}
@@ -159,12 +163,12 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
             >
               <div className="absolute inset-0 bg-gradient-to-r from-primary-100 to-blue-600 rounded-full blur-sm opacity-30 animate-pulse"></div>
               <div className="relative p-0.5 bg-gradient-to-r from-primary-100 to-blue-600 rounded-full">
-                <Image 
-                  src="/chakrigo-logo.png" 
-                  alt="ChakriGO Logo" 
-                  width={42} 
+                <Image
+                  src="/chakrigo-logo.png"
+                  alt="ChakriGO Logo"
+                  width={42}
                   height={42}
-                  className="rounded-full bg-gray-900" 
+                  className="rounded-full bg-gray-900"
                 />
               </div>
             </motion.div>
@@ -174,7 +178,7 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1, duration: 0.3 }}
                 className="flex-1"
-              > 
+              >
                 <h2 className="text-lg font-bold tracking-wide select-none">
                   <span className="text-primary-100">Chakri</span>
                   <span className="text-white">GO</span>
@@ -182,7 +186,7 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
               </motion.div>
             )}
           </Link>
-          <motion.button 
+          <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={toggleSidebar}
@@ -191,17 +195,17 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
             {isSidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </motion.button>
         </div>
-        
 
-        
+
+
         {/* Navigation Links */}
         <div className="flex-1 py-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
           <nav className="px-2 space-y-1.5">
             {sidebarLinks.map((link) => (
-              <SidebarLink 
+              <SidebarLink
                 key={link.id}
-                href={link.href} 
-                icon={link.icon} 
+                href={link.href}
+                icon={link.icon}
                 label={link.label}
                 collapsed={isSidebarCollapsed}
                 active={link.id === activeSection}
@@ -213,7 +217,7 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
               <div className="border-t border-gray-800/40 pt-4"></div>
             </div>
 
-            <SidebarLink 
+            <SidebarLink
               href="/help-center"
               icon={<HelpCircle size={20} />}
               label="Help & Support"
@@ -224,8 +228,8 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
 
           </nav>
         </div>
-        
-        
+
+
 
         {/* User Profile */}
         <div className="p-4 border-t border-gray-800/50 bg-gray-900/50 backdrop-blur-sm">
@@ -246,22 +250,17 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
                       <span className="text-white font-medium text-sm truncate max-w-[120px]">{user?.name}</span>
                       <span className="text-gray-400 text-xs truncate max-w-[120px]">{user?.email}</span>
                     </div>
-                    
+
                     <div className="flex items-center">
-                      <button 
-                        className="p-2 rounded-md text-gray-400 hover:text-red-400 hover:bg-red-900/20 transition-colors"
-                        title="Sign out"
-                      >
-                        <LogOut size={16} />
-                      </button>
+                      <SignOutButton />
                     </div>
                   </div>
                 )}
               </div>
             </div>
           ) : (
-            <Link 
-              href="/sign-in" 
+            <Link
+              href="/sign-in"
               className={`bg-gradient-to-r from-primary-100 to-blue-600 text-black font-semibold py-2 ${isSidebarCollapsed ? 'px-2' : 'px-4'} rounded-lg flex items-center justify-center hover:opacity-90 transition-opacity`}
             >
               {isSidebarCollapsed ? 'In' : 'Login'}
@@ -274,40 +273,40 @@ const GlobalSidebar = ({ isSidebarCollapsed, toggleSidebar }: GlobalSidebarProps
 };
 
 // Enhanced Sidebar link component
-const SidebarLink = ({ 
-  href, 
-  icon, 
-  label, 
+const SidebarLink = ({
+  href,
+  icon,
+  label,
   collapsed,
   active,
   pulse,
   badge,
   isNew
-}: { 
-  href: string; 
-  icon: React.ReactNode; 
-  label: string; 
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
   collapsed: boolean;
   active: boolean;
   pulse?: boolean;
   badge?: string;
   isNew?: boolean;
 }) => (
-  <Link 
-    href={href} 
+  <Link
+    href={href}
     className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'} p-3 rounded-lg transition-all duration-200 group relative
-      ${active 
-        ? 'bg-gradient-to-r from-primary-100/20 to-transparent text-white' 
+      ${active
+        ? 'bg-gradient-to-r from-primary-100/20 to-transparent text-white'
         : 'text-gray-400 hover:text-white hover:bg-gray-800/40'}`}
   >
     {active && (
-      <motion.div 
+      <motion.div
         layoutId="sidebar-active-indicator"
         className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-primary-100 rounded-r-full"
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       />
     )}
-    
+
     <div className="flex items-center">
       <div className={`relative ${active ? 'text-primary-100' : 'text-gray-400 group-hover:text-primary-100'} transition-colors`}>
         {icon}
@@ -315,18 +314,18 @@ const SidebarLink = ({
           <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-primary-100 rounded-full animate-ping opacity-75"></span>
         )}
       </div>
-      
+
       {!collapsed && (
         <span className={`ml-3 font-medium ${active ? 'text-white' : ''}`}>{label}</span>
       )}
     </div>
-    
+
     {!collapsed && badge && (
       <span className="px-2 py-0.5 text-xs bg-primary-100/20 text-primary-100 rounded-full">
         {badge}
       </span>
     )}
-    
+
     {!collapsed && isNew && (
       <span className="px-1.5 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-blue-600/30 text-blue-200 rounded-sm">
         New

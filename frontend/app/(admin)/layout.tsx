@@ -70,12 +70,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
       active: pathname.startsWith('/manage-interview')
     },
     {
-      name: 'Create Interview',
-      href: '/create-interview',
-      icon: FaUserPlus,
-      active: pathname.startsWith('/create-interview')
-    },
-    {
       name: 'Moderator Applications',
       href: '/moderator-applications',
       icon: FaBuilding,

@@ -1,0 +1,782 @@
+{
+  "website_overview": {
+    "name": "ChakriGO",
+    "description": "AI-powered interview preparation platform with mock interviews, skill assessments, resume building, and career insights",
+    "company": "ChakriGO Inc.",
+    "technologies": ["Next.js", "React", "TypeScript", "Firebase", "FastAPI", "AI/LLM Integration"]
+  },
+  "routes": {
+    "public_routes": {
+      "/": {
+        "name": "Homepage",
+        "file": "app/(root)/page.tsx",
+        "description": "Main landing page showcasing all platform features",
+        "workflow_context": {
+          "interruption_level": "low",
+          "safe_to_route": true,
+          "reason": "Homepage is informational and doesn't involve active workflows",
+          "data_loss_risk": "none",
+          "session_dependent": false,
+          "requires_confirmation": false
+        },
+        "sections": [
+          "Hero section with CTA",
+          "AI Mock Interviews showcase",
+          "Skill Assessment platform",
+          "Resume Builder features",
+          "Career Interview Experiences",
+          "Enterprise solutions",
+          "Footer with links"
+        ],
+        "key_features": [
+          "Next-level interview preparation messaging",
+          "AI-powered mock interviews",
+          "Proctored skill assessments with eye-tracking",
+          "ATS-optimized resume builder",
+          "Interview community platform",
+          "Enterprise partnerships showcase"
+        ],
+        "cta_buttons": [
+          "Get Started Free",
+          "Start Mock Interview",
+          "Take Verified Assessment",
+          "Build Resume",
+          "Explore Interview Experiences"
+        ]
+      },
+      "/sign-in": {
+        "name": "Sign In",
+        "file": "app/(auth)/sign-in/",
+        "description": "User authentication page",
+        "functionality": "Firebase authentication integration",
+        "workflow_context": {
+          "interruption_level": "medium",
+          "safe_to_route": true,
+          "reason": "Authentication is typically intentional but may interrupt browsing",
+          "data_loss_risk": "low",
+          "session_dependent": false,
+          "requires_confirmation": false,
+          "redirect_after_auth": true
+        }
+      },
+      "/sign-up": {
+        "name": "Sign Up",
+        "file": "app/(auth)/sign-up/",
+        "description": "User registration page",
+        "functionality": "New user account creation",
+        "workflow_context": {
+          "interruption_level": "medium",
+          "safe_to_route": true,
+          "reason": "Registration is typically intentional but may interrupt browsing",
+          "data_loss_risk": "low",
+          "session_dependent": false,
+          "requires_confirmation": false,
+          "form_data_present": true
+        }
+      },
+      "/verify-email": {
+        "name": "Email Verification",
+        "file": "app/verify-email/",
+        "description": "Email verification page for new users",
+        "workflow_context": {
+          "interruption_level": "low",
+          "safe_to_route": true,
+          "reason": "Usually accessed from email links, no active workflow",
+          "data_loss_risk": "none",
+          "session_dependent": false,
+          "requires_confirmation": false
+        }
+      }
+    },
+    "authenticated_routes": {
+      "/dashboard": {
+        "name": "User Dashboard",
+        "file": "app/(root)/dashboard/page.tsx",
+        "description": "Main dashboard for authenticated users",
+        "workflow_context": {
+          "interruption_level": "low",
+          "safe_to_route": true,
+          "reason": "Dashboard is a central hub, safe navigation point",
+          "data_loss_risk": "none",
+          "session_dependent": true,
+          "requires_confirmation": false,
+          "is_safe_navigation_hub": true
+        },
+        "features": [
+          "AI Mock Interviews access",
+          "Proctored Skill Assessments",
+          "Resume Builder",
+          "Interview Community",
+          "Moderator Dashboard (for moderators)"
+        ],
+        "user_types": ["regular_users", "moderators"]
+      },
+      "/interview-home": {
+        "name": "Interview Home",
+        "file": "app/(root)/interview-home/",
+        "description": "Interview preparation hub",
+        "functionality": "Access to various interview types and preparation tools",
+        "workflow_context": {
+          "interruption_level": "low",
+          "safe_to_route": true,
+          "reason": "Preparation hub, no active interview in progress",
+          "data_loss_risk": "none",
+          "session_dependent": true,
+          "requires_confirmation": false,
+          "is_preparation_area": true
+        }
+      },
+      "/interview-main": {
+        "name": "Interview Main",
+        "file": "app/(root)/interview-main/",
+        "description": "Main interview interface",
+        "workflow_context": {
+          "interruption_level": "critical",
+          "safe_to_route": false,
+          "reason": "Active interview session in progress",
+          "data_loss_risk": "high",
+          "session_dependent": true,
+          "requires_confirmation": true,
+          "confirmation_message": "You have an active interview session. Leaving will end your current interview. Are you sure?",
+          "active_session_type": "live_interview",
+          "time_sensitive": true
+        },
+        "sub_routes": {
+          "/interview-main/[id]": {
+            "description": "Specific interview session",
+            "workflow_context": {
+              "interruption_level": "critical",
+              "safe_to_route": false,
+              "reason": "Active interview session with specific ID",
+              "data_loss_risk": "high",
+              "session_dependent": true,
+              "requires_confirmation": true,
+              "confirmation_message": "You are currently in an interview session. Leaving will terminate your interview and you may lose progress. Continue?",
+              "active_session_type": "live_interview",
+              "time_sensitive": true,
+              "preserves_state": false
+            },
+            "sub_routes": {
+              "/interview-main/[id]/feedback": {
+                "file": "app/(root)/interview-main/[id]/feedback/page.tsx",
+                "description": "Interview feedback and results page",
+                "workflow_context": {
+                  "interruption_level": "low",
+                  "safe_to_route": true,
+                  "reason": "Interview completed, viewing results",
+                  "data_loss_risk": "none",
+                  "session_dependent": true,
+                  "requires_confirmation": false,
+                  "session_completed": true
+                },
+                "features": [
+                  "Overall score display",
+                  "Category-wise breakdown",
+                  "Strengths and improvement areas",
+                  "Final assessment comments"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "/skill-assessment": {
+        "name": "Skill Assessment Hub",
+        "file": "app/(root)/skill-assessment/page.tsx",
+        "description": "Skill assessment platform with proctoring",
+        "workflow_context": {
+          "interruption_level": "low",
+          "safe_to_route": true,
+          "reason": "Assessment selection hub, no active assessment",
+          "data_loss_risk": "none",
+          "session_dependent": true,
+          "requires_confirmation": false,
+          "is_preparation_area": true
+        },
+        "features": [
+          "AI-powered assessments",
+          "Multiple categories (Frontend, Backend, DevOps, etc.)",
+          "Difficulty levels (Beginner, Intermediate, Advanced)",
+          "Advanced proctoring system",
+          "Eye-tracking technology",
+          "Tab-switching detection",
+          "Camera monitoring"
+        ],
+        "assessment_features": [
+          "Comprehensive skill validation",
+          "Industry-standard benchmarking",
+          "Real-time integrity monitoring"
+        ],
+        "sub_routes": {
+          "/skill-assessment/[id]": {
+            "file": "app/(root)/skill-assessment/[id]/page.tsx",
+            "description": "Individual assessment taking interface",
+            "workflow_context": {
+              "interruption_level": "critical",
+              "safe_to_route": false,
+              "reason": "Active proctored assessment in progress",
+              "data_loss_risk": "critical",
+              "session_dependent": true,
+              "requires_confirmation": true,
+              "confirmation_message": "You are currently taking a proctored assessment. Leaving will terminate your assessment and you will not be able to resume. This action cannot be undone. Are you absolutely sure?",
+              "active_session_type": "proctored_assessment",
+              "time_sensitive": true,
+              "preserves_state": false,
+              "proctoring_active": true,
+              "integrity_monitoring": true
+            },
+            "functionality": [
+              "Question progression",
+              "Timer management",
+              "Answer recording",
+              "Results calculation",
+              "AI-powered study recommendations",
+              "Performance analytics",
+              "Time tracking per question"
+            ],
+            "assessment_states": [
+              "intro",
+              "in_progress", 
+              "completed"
+            ]
+          }
+        }
+      },
+      "/resume-builder": {
+        "name": "Resume Builder",
+        "file": "app/(root)/resume-builder/",
+        "description": "AI-powered ATS-optimized resume builder",
+        "workflow_context": {
+          "interruption_level": "medium",
+          "safe_to_route": false,
+          "reason": "User may have unsaved resume changes",
+          "data_loss_risk": "medium",
+          "session_dependent": true,
+          "requires_confirmation": true,
+          "confirmation_message": "You have unsaved changes to your resume. Leaving will lose your current progress. Save your work or continue editing?",
+          "has_autosave": true,
+          "form_data_present": true,
+          "preserves_state": true
+        },
+        "features": [
+          "ATS optimization",
+          "Modern templates",
+          "AI content suggestions",
+          "Real-time feedback",
+          "Keyword optimization",
+          "Multiple industry templates"
+        ],
+        "types_file": "app/(root)/resume-builder/types.ts"
+      },
+      "/career": {
+        "name": "Career Experiences",
+        "file": "app/(root)/career/page.tsx",
+        "description": "Interview experiences sharing platform",
+        "workflow_context": {
+          "interruption_level": "low",
+          "safe_to_route": true,
+          "reason": "Browsing content, no active creation or editing",
+          "data_loss_risk": "none",
+          "session_dependent": true,
+          "requires_confirmation": false,
+          "is_content_browsing": true
+        },
+        "features": [
+          "Real interview experiences database",
+          "Company-specific insights",
+          "Role and experience filtering",
+          "Anonymous contribution system",
+          "Trending companies and topics"
+        ],
+        "sub_routes": {
+          "/career/company/[companyName]": {
+            "file": "app/(root)/career/company/[companyName]/page.tsx",
+            "description": "Company-specific interview experiences",
+            "workflow_context": {
+              "interruption_level": "low",
+              "safe_to_route": true,
+              "reason": "Viewing company-specific content, no active workflow",
+              "data_loss_risk": "none",
+              "session_dependent": true,
+              "requires_confirmation": false,
+              "is_content_browsing": true
+            }
+          }
+        },
+        "popular_topics": [
+          "Technical Interviews",
+          "Behavioral Questions", 
+          "System Design",
+          "Coding Challenges",
+          "Security Interviews"
+        ]
+      },
+      "/system-design": {
+        "name": "System Design Studio",
+        "file": "app/(root)/system-design/page.tsx",
+        "description": "AI-powered system design generation and visualization",
+        "workflow_context": {
+          "interruption_level": "medium",
+          "safe_to_route": false,
+          "reason": "User may have active design generation or unsaved work",
+          "data_loss_risk": "medium",
+          "session_dependent": true,
+          "requires_confirmation": true,
+          "confirmation_message": "You have an active system design session. Leaving will lose your current diagram and progress. Continue?",
+          "active_generation": true,
+          "preserves_state": false,
+          "streaming_in_progress": true
+        },
+        "features": [
+          "Natural language to system design",
+          "PlantUML diagram generation",
+          "Interactive D3 visualizations",
+          "Real-time streaming progress",
+          "Multiple view modes",
+          "Architecture explanations"
+        ],
+        "view_modes": [
+          "PlantUML View",
+          "Interactive View"
+        ],
+        "example_prompts": [
+          "Design a video streaming platform like YouTube",
+          "Create a microservices e-commerce architecture"
+        ]
+      },
+      "/algo-visualizer": {
+        "name": "Algorithm Visualizer",
+        "file": "app/(root)/algo-visualizer/page.tsx",
+        "description": "Interactive algorithm visualization platform",
+        "workflow_context": {
+          "interruption_level": "low",
+          "safe_to_route": true,
+          "reason": "Algorithm selection hub, no active visualization",
+          "data_loss_risk": "none",
+          "session_dependent": true,
+          "requires_confirmation": false,
+          "is_selection_hub": true
+        },
+        "categories": [
+          "Graph Traversal",
+          "Sorting",
+          "Dynamic Programming",
+          "Tree Algorithms"
+        ],
+        "stock_algorithms": [
+          {
+            "name": "Breadth-First Search",
+            "difficulty": "Beginner",
+            "href": "/algo-visualizer/bfs"
+          },
+          {
+            "name": "Depth-First Search", 
+            "difficulty": "Beginner",
+            "href": "/algo-visualizer/dfs"
+          },
+          {
+            "name": "Quick Sort",
+            "difficulty": "Intermediate",
+            "href": "/algo-visualizer/quicksort"
+          },
+          {
+            "name": "Dijkstra's Algorithm",
+            "difficulty": "Advanced",
+            "href": "/algo-visualizer/dijkstra"
+          }
+        ],
+        "sub_routes": {
+          "/algo-visualizer/ai-animation": {
+            "description": "AI-powered algorithm animation generation",
+            "workflow_context": {
+              "interruption_level": "medium",
+              "safe_to_route": false,
+              "reason": "AI animation generation in progress",
+              "data_loss_risk": "medium",
+              "session_dependent": true,
+              "requires_confirmation": true,
+              "confirmation_message": "Animation generation is in progress. Leaving will stop the current generation. Continue?",
+              "active_generation": true,
+              "streaming_in_progress": true
+            }
+          },
+          "/algo-visualizer/(stock)/dijkstra": {
+            "file": "app/(root)/algo-visualizer/(stock)/dijkstra/page.tsx",
+            "description": "Dijkstra's algorithm interactive visualization",
+            "workflow_context": {
+              "interruption_level": "medium",
+              "safe_to_route": false,
+              "reason": "Interactive visualization may be running or have custom input",
+              "data_loss_risk": "low",
+              "session_dependent": true,
+              "requires_confirmation": true,
+              "confirmation_message": "You have an active algorithm visualization. Leaving will reset the current state. Continue?",
+              "interactive_session": true,
+              "preserves_state": false
+            }
+          }
+        }
+      },
+      "/leetcode-qna": {
+        "name": "LeetCode Q&A",
+        "file": "app/(root)/leetcode-qna/",
+        "description": "LeetCode interview preparation platform",
+        "functionality": "Interactive coding interview practice with AI assistance",
+        "workflow_context": {
+          "interruption_level": "medium",
+          "safe_to_route": false,
+          "reason": "User may have active coding session or unsaved code",
+          "data_loss_risk": "medium",
+          "session_dependent": true,
+          "requires_confirmation": true,
+          "confirmation_message": "You have an active coding session. Leaving will lose your current code and progress. Continue?",
+          "coding_session_active": true,
+          "preserves_state": false
+        }
+      },
+      "/code-snippet": {
+        "name": "Code Snippets Manager",
+        "file": "app/(root)/code-snippet/page.tsx",
+        "description": "Code snippet storage and organization system",
+        "workflow_context": {
+          "interruption_level": "low",
+          "safe_to_route": true,
+          "reason": "Snippet browser, no active editing",
+          "data_loss_risk": "none",
+          "session_dependent": true,
+          "requires_confirmation": false,
+          "is_content_browsing": true
+        },
+        "features": [
+          "Folder-based organization",
+          "Snippet creation and editing",
+          "Code syntax highlighting",
+          "Search and filter capabilities"
+        ],
+        "sub_routes": {
+          "/code-snippet/new": {
+            "description": "Create new code snippet interface",
+            "workflow_context": {
+              "interruption_level": "medium",
+              "safe_to_route": false,
+              "reason": "User may have unsaved snippet content",
+              "data_loss_risk": "medium",
+              "session_dependent": true,
+              "requires_confirmation": true,
+              "confirmation_message": "You have unsaved changes to your code snippet. Leaving will lose your work. Continue?",
+              "form_data_present": true,
+              "editing_session": true
+            }
+          }
+        }
+      },
+      "/course-home": {
+        "name": "Course Platform",
+        "file": "app/(root)/course-home/page.tsx",
+        "description": "Educational course platform",
+        "workflow_context": {
+          "interruption_level": "low",
+          "safe_to_route": true,
+          "reason": "Course selection hub, no active course",
+          "data_loss_risk": "none",
+          "session_dependent": true,
+          "requires_confirmation": false,
+          "is_selection_hub": true
+        },
+        "categories": [
+          {
+            "id": "tech",
+            "name": "Technical Skills",
+            "courses": [
+              "Algorithms & Data Structures",
+              "System Design Fundamentals",
+              "React Interview Prep"
+            ]
+          },
+          {
+            "id": "soft", 
+            "name": "Soft Skills",
+            "courses": [
+              "STAR Method Mastery",
+              "Technical Communication"
+            ]
+          },
+          {
+            "id": "career",
+            "name": "Career Development", 
+            "courses": [
+              "Portfolio & Resume Building",
+              "Salary Negotiation Tactics"
+            ]
+          }
+        ]
+      },
+      "/chatbot": {
+        "name": "AI Chatbot",
+        "file": "app/(root)/chatbot/",
+        "description": "AI-powered interview preparation assistant",
+        "workflow_context": {
+          "interruption_level": "low",
+          "safe_to_route": true,
+          "reason": "Chatbot interface, conversation can be resumed",
+          "data_loss_risk": "low",
+          "session_dependent": true,
+          "requires_confirmation": false,
+          "preserves_conversation": true
+        }
+      }
+    },
+    "moderator_routes": {
+      "/moderator-dashboard": {
+        "name": "Moderator Dashboard",
+        "file": "app/(root)/moderator-dashboard/",
+        "description": "Company moderator interface for managing interviews",
+        "access": "moderator_only",
+        "workflow_context": {
+          "interruption_level": "low",
+          "safe_to_route": true,
+          "reason": "Dashboard overview, no active moderation",
+          "data_loss_risk": "none",
+          "session_dependent": true,
+          "requires_confirmation": false,
+          "is_dashboard": true
+        },
+        "sub_routes": {
+          "/moderator-dashboard/interview/[id]": {
+            "file": "app/(root)/moderator-dashboard/interview/[id]/page.tsx",
+            "description": "Individual interview results and feedback management",
+            "workflow_context": {
+              "interruption_level": "medium",
+              "safe_to_route": false,
+              "reason": "Moderator may be reviewing or providing feedback",
+              "data_loss_risk": "medium",
+              "session_dependent": true,
+              "requires_confirmation": true,
+              "confirmation_message": "You may have unsaved feedback or review notes. Leaving will lose your progress. Continue?",
+              "review_session_active": true,
+              "form_data_present": true
+            }
+          }
+        }
+      }
+    },
+    "admin_routes": {
+      "layout": "app/(admin)/layout.tsx",
+      "access": "admin_only",
+      "navigation": [
+        {
+          "name": "Dashboard",
+          "href": "/",
+          "description": "Admin overview dashboard"
+        },
+        {
+          "name": "Skill Assessments", 
+          "href": "/manage-skill-assessment",
+          "description": "Assessment management interface"
+        },
+        {
+          "name": "Interviews",
+          "href": "/manage-interview", 
+          "description": "Interview management system"
+        },
+        {
+          "name": "Moderator Applications",
+          "href": "/moderator-applications",
+          "description": "Moderator application review"
+        },
+        {
+          "name": "User Management",
+          "description": "User role and permission management"
+        }
+      ],
+      "routes": {
+        "/manage-skill-assessment": {
+          "file": "app/(admin)/manage-skill-assessment/page.tsx",
+          "description": "Admin interface for managing skill assessments",
+          "workflow_context": {
+            "interruption_level": "medium",
+            "safe_to_route": false,
+            "reason": "Admin may be creating or editing assessments",
+            "data_loss_risk": "high",
+            "session_dependent": true,
+            "requires_confirmation": true,
+            "confirmation_message": "You may have unsaved changes to assessment configurations. Leaving will lose your work. Continue?",
+            "admin_editing_session": true,
+            "affects_platform_content": true
+          },
+          "features": [
+            "View all assessments (published and unpublished)",
+            "Create new assessments",
+            "Edit existing assessments", 
+            "Delete assessments",
+            "Publish/unpublish assessments"
+          ]
+        },
+        "/manage-interview": {
+          "file": "app/(admin)/manage-interview/",
+          "description": "Interview management and oversight",
+          "workflow_context": {
+            "interruption_level": "medium",
+            "safe_to_route": false,
+            "reason": "Admin may be configuring interview settings",
+            "data_loss_risk": "high",
+            "session_dependent": true,
+            "requires_confirmation": true,
+            "confirmation_message": "You may have unsaved interview configuration changes. Continue?",
+            "admin_configuration_session": true,
+            "affects_platform_operations": true
+          }
+        },
+        "/moderator-applications": {
+          "file": "app/(admin)/moderator-applications/",
+          "description": "Review and approve moderator applications",
+          "workflow_context": {
+            "interruption_level": "medium",
+            "safe_to_route": false,
+            "reason": "Admin may be reviewing applications",
+            "data_loss_risk": "medium",
+            "session_dependent": true,
+            "requires_confirmation": true,
+            "confirmation_message": "You may have unsaved application review notes. Continue?",
+            "review_session_active": true,
+            "affects_user_status": true
+          }
+        },
+        "/user-management": {
+          "file": "app/(admin)/user-management/",
+          "description": "User role management and administration",
+          "workflow_context": {
+            "interruption_level": "high",
+            "safe_to_route": false,
+            "reason": "Admin may be modifying user permissions or roles",
+            "data_loss_risk": "critical",
+            "session_dependent": true,
+            "requires_confirmation": true,
+            "confirmation_message": "You are modifying user permissions. Unsaved changes will be lost and may affect user access. Continue?",
+            "admin_critical_session": true,
+            "affects_user_access": true,
+            "security_sensitive": true
+          }
+        },
+        "/admin-dashboard": {
+          "file": "app/(admin)/admin-dashboard/",
+          "description": "Main admin dashboard with system overview",
+          "workflow_context": {
+            "interruption_level": "low",
+            "safe_to_route": true,
+            "reason": "Dashboard overview, no active editing",
+            "data_loss_risk": "none",
+            "session_dependent": true,
+            "requires_confirmation": false,
+            "is_dashboard": true
+          }
+        }
+      }
+    }
+  },
+  "workflow_interruption_guidelines": {
+    "interruption_levels": {
+      "low": {
+        "description": "Safe to navigate, no risk of data loss",
+        "action": "Route immediately",
+        "examples": ["dashboards", "content browsing", "completed sessions"]
+      },
+      "medium": {
+        "description": "Some risk of data loss, user should be warned",
+        "action": "Show confirmation dialog with save option",
+        "examples": ["form editing", "content creation", "draft work"]
+      },
+      "high": {
+        "description": "Significant risk of data loss or workflow disruption",
+        "action": "Strong warning with explicit confirmation",
+        "examples": ["admin configurations", "critical editing sessions"]
+      },
+      "critical": {
+        "description": "Active session that cannot be recovered",
+        "action": "Block navigation unless explicitly confirmed",
+        "examples": ["live interviews", "proctored assessments", "timed sessions"]
+      }
+    },
+    "data_loss_risk_levels": {
+      "none": "No data will be lost",
+      "low": "Minimal data loss, easily recoverable",
+      "medium": "Moderate data loss, some work may be lost",
+      "high": "Significant data loss, substantial work may be lost",
+      "critical": "Complete loss of session data, cannot be recovered"
+    },
+    "chatbot_decision_logic": {
+      "always_route": [
+        "interruption_level === 'low'",
+        "safe_to_route === true && requires_confirmation === false"
+      ],
+      "confirm_before_route": [
+        "interruption_level === 'medium' || interruption_level === 'high'",
+        "requires_confirmation === true"
+      ],
+      "strongly_discourage": [
+        "interruption_level === 'critical'",
+        "data_loss_risk === 'critical'",
+        "active_session_type in ['live_interview', 'proctored_assessment']"
+      ],
+      "alternative_actions": [
+        "Suggest completing current task first",
+        "Offer to bookmark the requested page",
+        "Provide information about the requested page without routing",
+        "Schedule the navigation for after current session"
+      ]
+    }
+  },
+  "key_integrations": {
+    "ai_services": [
+      "Google Gemini 2.0 Flash for content generation",
+      "AI-powered interview question generation",
+      "Resume content enhancement",
+      "System design generation",
+      "Study recommendations"
+    ],
+    "backend_services": {
+      "fastapi_endpoints": [
+        "/ai-animation - Algorithm animation generation",
+        "/system-design - System design diagram generation", 
+        "/leetcode-qna - LeetCode interview assistance"
+      ]
+    },
+    "database": "Firebase Firestore",
+    "authentication": "Firebase Auth",
+    "file_storage": "Firebase Storage"
+  },
+  "special_features": {
+    "proctoring_technology": {
+      "eye_tracking": "Advanced eye movement monitoring",
+      "tab_switching_detection": "Prevents cheating during assessments",
+      "camera_monitoring": "Identity verification and behavior analysis",
+      "integrity_validation": "Real-time assessment integrity monitoring"
+    },
+    "ai_capabilities": {
+      "dynamic_questioning": "AI adapts questions based on responses",
+      "instant_feedback": "Real-time performance analysis",
+      "content_enhancement": "ATS-optimized resume improvements",
+      "system_design_generation": "Natural language to architecture diagrams",
+      "study_recommendations": "Personalized learning paths"
+    },
+    "enterprise_features": {
+      "moderator_system": "Company-specific interview management",
+      "analytics_dashboard": "Performance tracking and insights",
+      "bulk_user_management": "Enterprise user administration"
+    }
+  },
+  "user_journey": {
+    "guest_user": [
+      "Homepage → Sign Up → Dashboard → Feature Selection"
+    ],
+    "authenticated_user": [
+      "Dashboard → Mock Interview/Skill Assessment/Resume Builder → Results/Feedback"
+    ],
+    "moderator": [
+      "Dashboard → Moderator Dashboard → Interview Management → Results Review"
+    ],
+    "admin": [
+      "Admin Dashboard → System Management → User/Content Administration"
+    ]
+  }
+}

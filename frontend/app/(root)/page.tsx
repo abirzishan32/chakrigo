@@ -448,7 +448,7 @@ export default async function HomePage() {
               </div>
               
               <div className="w-full md:w-1/4 flex justify-center">
-                <Link href="/enterprise-inquiry" className="group">
+                <Link href="/moderator-dashboard" className="group">
                   <div className="relative w-40 h-40 flex items-center justify-center">
                     <div className="absolute inset-0 bg-gradient-to-r from-primary-100/20 to-blue-600/20 rounded-full blur-md group-hover:blur-lg transition-all"></div>
                     <div className="absolute inset-0 border border-primary-100/30 rounded-full"></div>
@@ -531,7 +531,7 @@ export default async function HomePage() {
                 <li><Link href="/success-stories" className="text-gray-400 hover:text-primary-100 text-sm transition-colors">Success Stories</Link></li>
                 <li><Link href="/help-center" className="text-gray-400 hover:text-primary-100 text-sm transition-colors">Help Center</Link></li>
                 <li><Link href="/faq" className="text-gray-400 hover:text-primary-100 text-sm transition-colors">FAQ</Link></li>
-                <li><Link href="/enterprise-inquiry" className="text-gray-400 hover:text-primary-100 text-sm transition-colors">Enterprise</Link></li>
+                <li><Link href="/moderator-dashboard" className="text-gray-400 hover:text-primary-100 text-sm transition-colors">Enterprise</Link></li>
               </ul>
             </div>
             

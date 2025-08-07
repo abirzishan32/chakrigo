@@ -2,15 +2,21 @@
 
 import { useState } from 'react';
 import { LogOut } from 'lucide-react';
-import { signOut } from 'next-auth/react';
+import { signOut } from '@/lib/actions/auth.action';
+import { useRouter } from 'next/navigation';
 
 const SignOutButton = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSignOut = async () => {
     try {
       setIsLoading(true);
-      await signOut({ callbackUrl: '/' });
+      await signOut();
+      // Redirect to home page after successful sign out
+      router.push('/');
+      // Force a page refresh to clear any cached user state
+      window.location.reload();
     } catch (error) {
       console.error('Sign out error:', error);
     } finally {
