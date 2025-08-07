@@ -1,7 +1,7 @@
 import { getInterviewById, canAccessModeratorInterview, hasUserCompletedInterview } from "@/lib/actions/general.action";
 import { redirect } from "next/navigation";
 import VoiceAgent from "@/components/VoiceAgent";
-import { getCurrentUser, isAuthenticated } from "@/lib/actions/auth.action";
+import { isAuthenticated, getCurrentUser } from "@/lib/actions/auth.action";
 
 const Page = async ({ params }: RouteParams) => {
     // Check authentication first

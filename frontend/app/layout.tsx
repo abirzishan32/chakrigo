@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Mona_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
-
+import NavigationChatBot from "@/components/NavigationChatbot";
 
 const monaSans = Mona_Sans({
   variable: "--font-mona-sans",
@@ -23,6 +23,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`${monaSans.className} antialiased pattern`}>
         {children}
+         <NavigationChatBot />
         <Toaster />
       </body>
     </html>
