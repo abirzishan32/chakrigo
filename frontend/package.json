@@ -92,6 +92,8 @@
     "rehype-highlight": "^7.0.2",
     "remark-gfm": "^4.0.1",
     "sigma": "^3.0.1",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "sonner": "^2.0.2",
     "speech-to-text": "^2.9.1",
     "tailwind-merge": "^3.0.2",

@@ -14,7 +14,6 @@ import {
     TrendingUp,
     Briefcase,
     Eye,
-    MoreVertical,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";

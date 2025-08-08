@@ -294,3 +294,22 @@ interface CodeFolder {
   updatedAt: string;
   userId: string;
 }
+
+export type NotificationType = 
+  | 'ANNOUNCEMENT'
+  | 'INTERVIEW_SCHEDULED'
+  | 'INTERVIEW_ENDED'
+  | 'INTERVIEW_REMINDER'
+  | 'MESSAGE'
+  | 'RECORDING_STARTED'
+  | 'RECORDING_STOPPED';
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  message: string;
+  read: boolean;
+  status: string;
+  createdAt: string;
+  meta: any;
+}
