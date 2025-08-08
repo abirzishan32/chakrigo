@@ -4,7 +4,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { getCurrentUser, signOut } from "@/lib/actions/auth.action";
 import SignOutButton from "@/components/SignOutButton";
-import { NotificationMenu } from "@/components/notifications/notification-menu";
+import { NotificationMenu } from "@/components/notifications/NotificationMenu";
 import {
     Home,
     Users,
@@ -114,7 +114,6 @@ const GlobalSidebar = ({
             id: "code-snippet",
             pulse: false,
         },
-
         {
             href: "/system-design",
             icon: <BrainCog size={20} />,
@@ -151,56 +150,56 @@ const GlobalSidebar = ({
             </div>
 
             <div className="relative z-10 flex flex-col h-full">
-                {/* Logo and collapse button */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-800/60 bg-gray-900/50 backdrop-blur-sm">
-                    <Link
-                        href="/"
-                        className={`flex items-center gap-3 ${
-                            isSidebarCollapsed ? "justify-center" : ""
-                        }`}
-                    >
-                        <motion.div
-                            className="relative overflow-hidden rounded-full"
-                            animate={{
-                                scale: [1, 1.05, 1],
-                                rotate: [0, 5, -5, 0],
-                            }}
-                            transition={{
-                                duration: 3,
-                                repeat: Infinity,
-                                repeatType: "reverse",
-                            }}
+                {/* Logo and header section */}
+                <div className="flex flex-col border-b border-gray-800/60 bg-gray-900/50 backdrop-blur-sm">
+                    {/* Logo and collapse button */}
+                    <div className="flex items-center justify-between p-4">
+                        <Link
+                            href="/"
+                            className={`flex items-center gap-3 ${
+                                isSidebarCollapsed ? "justify-center" : ""
+                            }`}
                         >
-                            <div className="absolute inset-0 bg-gradient-to-r from-primary-100 to-blue-600 rounded-full blur-sm opacity-30 animate-pulse"></div>
-                            <div className="relative p-0.5 bg-gradient-to-r from-primary-100 to-blue-600 rounded-full">
-                                <Image
-                                    src="/chakrigo-logo.png"
-                                    alt="ChakriGO Logo"
-                                    width={42}
-                                    height={42}
-                                    className="rounded-full bg-gray-900"
-                                />
-                            </div>
-                        </motion.div>
-                        {!isSidebarCollapsed && (
                             <motion.div
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.1, duration: 0.3 }}
-                                className="flex-1"
+                                className="relative overflow-hidden rounded-full"
+                                animate={{
+                                    scale: [1, 1.05, 1],
+                                    rotate: [0, 5, -5, 0],
+                                }}
+                                transition={{
+                                    duration: 3,
+                                    repeat: Infinity,
+                                    repeatType: "reverse",
+                                }}
                             >
-                                <h2 className="text-lg font-bold tracking-wide select-none">
-                                    <span className="text-primary-100">
-                                        Chakri
-                                    </span>
-                                    <span className="text-white">GO</span>
-                                </h2>
+                                <div className="absolute inset-0 bg-gradient-to-r from-primary-100 to-blue-600 rounded-full blur-sm opacity-30 animate-pulse"></div>
+                                <div className="relative p-0.5 bg-gradient-to-r from-primary-100 to-blue-600 rounded-full">
+                                    <Image
+                                        src="/chakrigo-logo.png"
+                                        alt="ChakriGO Logo"
+                                        width={42}
+                                        height={42}
+                                        className="rounded-full bg-gray-900"
+                                    />
+                                </div>
                             </motion.div>
-                        )}
-                    </Link>
-                    <div className="flex items-center gap-2">
-                        {/* Notification Menu */}
-                        {isUserAuth && <NotificationMenu />}
+                            {!isSidebarCollapsed && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.1, duration: 0.3 }}
+                                    className="flex-1"
+                                >
+                                    <h2 className="text-lg font-bold tracking-wide select-none">
+                                        <span className="text-primary-100">
+                                            Chakri
+                                        </span>
+                                        <span className="text-white">GO</span>
+                                    </h2>
+                                </motion.div>
+                            )}
+                        </Link>
+                        
                         <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
@@ -214,6 +213,15 @@ const GlobalSidebar = ({
                             )}
                         </motion.button>
                     </div>
+
+                    {/* Notification section - better positioned */}
+                    {isUserAuth && (
+                        <div className={`${isSidebarCollapsed ? 'px-2 pb-4' : 'px-4 pb-4'}`}>
+                            <div className="relative">
+                                <NotificationMenu collapsed={isSidebarCollapsed} />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Navigation Links */}

@@ -37,7 +37,11 @@ const NOTIFICATION_ICONS: Record<NotificationType, React.ReactNode> = {
     RECORDING_STOPPED: <Video className="h-4 w-4" />,
 };
 
-export function NotificationMenu() {
+interface NotificationMenuProps {
+    collapsed?: boolean;
+}
+
+export function NotificationMenu({ collapsed = false }: NotificationMenuProps) {
     const [isOpen, setIsOpen] = useState(false);
     const {
         notifications,
@@ -93,16 +97,24 @@ export function NotificationMenu() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 className={cn(
-                    "flex items-start gap-3 p-3 rounded-lg transition-colors",
-                    isUnread ? "bg-muted/50" : "hover:bg-muted/30"
+                    "flex items-start gap-3 p-3 rounded-lg transition-colors border-b border-gray-700/30 last:border-b-0",
+                    isUnread ? "bg-gray-800/40" : "hover:bg-gray-800/20"
                 )}
             >
-                <div className="mt-0.5">{icon}</div>
+                <div className={cn(
+                    "mt-0.5 p-1.5 rounded-full",
+                    isUnread 
+                        ? "bg-primary-100/20 text-primary-100" 
+                        : "bg-gray-700/50 text-gray-400"
+                )}>{icon}</div>
                 <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium leading-none">
+                    <p className={cn(
+                        "text-sm font-medium leading-none",
+                        isUnread ? "text-white" : "text-gray-300"
+                    )}>
                         {notification.message}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-gray-400 mt-1">
                         {format(new Date(notification.createdAt), "PPp")}
                     </p>
                 </div>
@@ -111,7 +123,7 @@ export function NotificationMenu() {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6"
+                            className="h-6 w-6 text-gray-400 hover:text-green-400"
                             onClick={() => handleMarkAsRead(notification.id)}
                         >
                             <Check className="h-3.5 w-3.5" />
@@ -121,7 +133,7 @@ export function NotificationMenu() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 text-muted-foreground hover:text-destructive cursor-pointer"
+                        className="h-6 w-6 text-gray-400 hover:text-red-400 cursor-pointer"
                         onClick={() => handleDelete(notification.id)}
                     >
                         <X className="h-3.5 w-3.5" />
@@ -137,32 +149,60 @@ export function NotificationMenu() {
             <DropdownMenuTrigger asChild>
                 <Button
                     variant="ghost"
-                    size="icon"
-                    className="relative rounded-full h-10 w-10"
+                    className={`relative w-full ${
+                        collapsed ? "justify-center" : "justify-start"
+                    } p-3 text-gray-400 hover:text-white hover:bg-gray-800/40 transition-colors rounded-lg group`}
                 >
-                    <Bell className="h-8 w-8" />
-                    {unreadCount > 0 && (
-                        <Badge
-                            variant="destructive"
-                            className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]"
-                        >
-                            {unreadCount > 99 ? "99+" : unreadCount}
-                        </Badge>
-                    )}
+                    <div className={`flex items-center ${collapsed ? "" : "gap-3 w-full"}`}>
+                        <div className="relative">
+                            <Bell className={`h-6 w-6 ${
+                                unreadCount > 0 
+                                    ? "text-primary-100" 
+                                    : "text-gray-400 group-hover:text-primary-100"
+                            } transition-colors`} />
+                            {unreadCount > 0 && (
+                                <motion.div
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    className="absolute -top-1 -right-1 h-4 w-4 bg-primary-100 rounded-full flex items-center justify-center"
+                                >
+                                    <span className="text-[10px] font-bold text-black">
+                                        {unreadCount > 99 ? "99+" : unreadCount}
+                                    </span>
+                                </motion.div>
+                            )}
+                        </div>
+                        {!collapsed && (
+                            <>
+                                <span className="font-medium group-hover:text-white transition-colors">
+                                    Notifications
+                                </span>
+                                {unreadCount > 0 && (
+                                    <Badge 
+                                        variant="secondary" 
+                                        className="ml-auto bg-primary-100/20 text-primary-100 border-primary-100/30"
+                                    >
+                                        {unreadCount}
+                                    </Badge>
+                                )}
+                            </>
+                        )}
+                    </div>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-                align="end"
-                className="sm:w-80 w-[90vw] overflow-y-hidden mx-4"
+                align="start"
+                sideOffset={8}
+                className="w-80 max-h-96 bg-gray-900/95 backdrop-blur-sm border-gray-700/50 shadow-xl"
             >
-                <DropdownMenuLabel className="flex items-center justify-between">
-                    <span>Notifications</span>
+                <DropdownMenuLabel className="flex items-center justify-between p-3 text-white">
+                    <span className="font-semibold">Notifications</span>
                     {notifications.length > 0 && (
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-7 px-2 text-xs"
+                                className="h-7 px-2 text-xs text-gray-400 hover:text-white"
                                 onClick={handleMarkAllAsRead}
                             >
                                 Mark all as read
@@ -170,7 +210,7 @@ export function NotificationMenu() {
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-7 px-2 text-xs text-destructive hover:text-destructive"
+                                className="h-7 px-2 text-xs text-gray-400 hover:text-red-400"
                                 onClick={handleDeleteAll}
                             >
                                 Clear all
@@ -180,7 +220,7 @@ export function NotificationMenu() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 hover:bg-muted/50 rounded-2xl cursor-pointer"
+                        className="h-6 w-6 hover:bg-gray-800/50 rounded-full cursor-pointer text-gray-400 hover:text-white"
                         onClick={handleRefresh}
                     >
                         <RefreshCcw
@@ -190,18 +230,23 @@ export function NotificationMenu() {
                         />
                     </Button>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="bg-gray-700/50" />
                 <ScrollArea className="h-[300px]">
-                    <div className="p-2 space-y-1">
+                    <div className="p-2">
                         <AnimatePresence>
                             {isLoading ? (
-                                <div className="text-center py-6 text-muted-foreground text-sm">
+                                <div className="text-center py-6 text-gray-400 text-sm">
                                     Loading notifications...
                                 </div>
                             ) : notifications.length === 0 ? (
-                                <div className="text-center py-6 text-muted-foreground text-sm">
-                                    No notifications
-                                </div>
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="text-center py-6 text-gray-400"
+                                >
+                                    <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                    <p className="text-sm">No notifications yet</p>
+                                </motion.div>
                             ) : (
                                 notifications.map(renderNotification)
                             )}
