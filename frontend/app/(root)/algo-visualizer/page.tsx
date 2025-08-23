@@ -50,6 +50,17 @@ const stockAlgorithms = [
     glowColor: "shadow-green-500/30"
   },
   {
+    id: "stack",
+    name: "Stack Visualizer",
+    description: "Visualize the operations of a stack data structure with push, pop, and peek functionalities.",
+    visualization: "stack-visualizer",
+    href: "/algo-visualizer/stack",
+    difficulty: "Beginner",
+    category: "Data Structures",
+    accentColor: "from-emerald-400 to-teal-300",
+    glowColor: "shadow-emerald-500/30"
+  },
+  {
     id: "dijkstra",
     name: "Dijkstra's Algorithm",
     description: "Discovers shortest weighted paths through systematic exploration of connected vertices.",
@@ -152,6 +163,97 @@ const AlgorithmVisualization = ({ type, accentColor }: {
           ))}
         </div>
       );
+
+    case "stack-visualizer":
+      return (
+        <div className="relative w-full h-32 flex flex-col items-center justify-center">
+          {/* TOP pointer */}
+          <div className="flex justify-center mb-2">
+            <div className="text-xs text-gray-400 flex flex-col items-center">
+              <span className="mb-1">TOP</span>
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                <path d="M12 3L12 21M12 21L7 16M12 21L17 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <animate attributeName="stroke" values="#9ca3af;#10b981;#9ca3af" dur="2s" repeatCount="indefinite" />
+                </path>
+              </svg>
+            </div>
+          </div>
+          
+          {/* Stack array visualization */}
+          <div className="flex space-x-1">
+            {/* Stack elements with animation */}
+            {[42, 17, 93, null, null, null].map((value, index) => (
+              <div
+                key={index}
+                className={`
+                  w-8 h-8 border-2 rounded flex items-center justify-center text-xs font-mono
+                  ${value !== null 
+                    ? 'border-emerald-400 bg-emerald-900/30 text-emerald-200' 
+                    : 'border-gray-600 bg-gray-800'
+                  }
+                `}
+                style={{
+                  transform: index === 2 ? 'scale(1.1)' : 'scale(1)',
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                {value !== null && (
+                  <span
+                    style={{
+                      animation: index === 2 ? 'pulse 1.5s infinite' : 'none',
+                    }}
+                  >
+                    {value}
+                  </span>
+                )}
+                
+                {/* Push animation for the next empty slot */}
+                {index === 3 && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-emerald-400 text-xs opacity-0" style={{
+                      animation: 'pushEffect 3s infinite'
+                    }}>
+                      25
+                    </span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          
+          {/* Array indices */}
+          <div className="flex space-x-1 mt-2">
+            {[0, 1, 2, 3, 4, 5].map((index) => (
+              <div key={index} className="w-8 text-center text-xs text-gray-500 font-mono">
+                [{index}]
+              </div>
+            ))}
+          </div>
+
+          {/* Animated operations text */}
+          <div className="mt-3 text-center">
+            <div className="text-xs text-gray-400">
+              <span style={{ animation: 'operationText 6s infinite' }}>
+                push(25) → pop() → peek()
+              </span>
+            </div>
+          </div>
+
+          {/* Add custom keyframes for animations */}
+          <style jsx>{`
+            @keyframes pushEffect {
+              0%, 66.7%, 100% { opacity: 0; transform: translateY(10px); }
+              16.7%, 50% { opacity: 1; transform: translateY(0); }
+            }
+            
+            @keyframes operationText {
+              0%, 100% { opacity: 0.6; }
+              33.3% { opacity: 1; color: #10b981; }
+              66.7% { opacity: 1; color: #ef4444; }
+            }
+          `}</style>
+        </div>
+      );
       
     case "weighted-path":
       return (
@@ -224,20 +326,20 @@ export default function AlgoVisualizerPage() {
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex justify-center mb-16">
-              <TabsList className="grid grid-cols-2 bg-gray-900/50 backdrop-blur-xl border border-gray-800 rounded-2xl p-2 shadow-2xl">
+              <TabsList className="grid grid-cols-2 bg-gray-900/50 backdrop-blur-xl border border-gray-800 rounded-2xl p-2 shadow-2xl h-auto">
                 <TabsTrigger 
                   value="stock" 
-                  className="flex items-center gap-3 px-8 py-4 rounded-xl font-medium transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30 text-gray-400 hover:text-gray-200"
+                  className="flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-medium transition-all duration-300 h-auto data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30 text-gray-400 hover:text-gray-200"
                 >
-                  <BookOpen className="h-5 w-5" />
-                  Curated Collection
+                  <BookOpen className="h-5 w-5 flex-shrink-0" />
+                  <span className="whitespace-nowrap">Curated Collection</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="ai" 
-                  className="flex items-center gap-3 px-8 py-4 rounded-xl font-medium transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/30 text-gray-400 hover:text-gray-200"
+                  className="flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-medium transition-all duration-300 h-auto data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/30 text-gray-400 hover:text-gray-200"
                 >
-                  <Sparkles className="h-5 w-5" />
-                  AI Studio
+                  <Sparkles className="h-5 w-5 flex-shrink-0" />
+                  <span className="whitespace-nowrap">AI Studio</span>
                 </TabsTrigger>
               </TabsList>
             </div>

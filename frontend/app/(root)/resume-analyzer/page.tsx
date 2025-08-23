@@ -55,40 +55,10 @@ function ResumeAnalyzerPage() {
     const [descriptionError, setDescriptionError] = useState("");
     const [fileError, setFileError] = useState("");
 
-    // Typing animation for header
-    const fullText = "Your Resume Analysis Dashboard";
-    const [displayedText, setDisplayedText] = useState("");
-    const [index, setIndex] = useState(0);
-    const [isTyping, setIsTyping] = useState(true);
-
     // Fetch analyses on component mount
     useEffect(() => {
         fetchAnalyses();
     }, []);
-
-    // Typing animation effect
-    useEffect(() => {
-        let timer;
-        if (isTyping) {
-            if (index < fullText.length) {
-                timer = setTimeout(() => {
-                    setDisplayedText((prev) => prev + fullText.charAt(index));
-                    setIndex(index + 1);
-                }, 50);
-            } else {
-                timer = setTimeout(() => {
-                    setIsTyping(false);
-                    setDisplayedText("");
-                    setIndex(0);
-                }, 3000);
-            }
-        } else {
-            timer = setTimeout(() => {
-                setIsTyping(true);
-            }, 500);
-        }
-        return () => clearTimeout(timer);
-    }, [index, isTyping, fullText]);
 
     const fetchAnalyses = async () => {
 
@@ -251,13 +221,8 @@ function ResumeAnalyzerPage() {
                             height={60}
                             className="rounded-lg shadow-lg"
                         />
-                        <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent min-h-[3rem] flex items-center">
-                            {isTyping ? displayedText : fullText}
-                            <span
-                                className={`ml-1 w-[3px] h-8 bg-blue-600 ${
-                                    isTyping ? "animate-pulse" : "opacity-0"
-                                }`}
-                            />
+                        <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            Your Resume Analysis Dashboard
                         </h1>
                     </motion.div>
 
