@@ -59,8 +59,14 @@ const DisqualificationScreen: React.FC<{ assessmentId?: string }> = ({ assessmen
             "You attempted to take a screenshot during the assessment. Screenshots are not allowed as they can be used to share assessment content."
           ) : disqualificationReason.includes("Looking away") || disqualificationReason.includes("Face not detected") ? (
             "Our proctoring system detected that you were looking away from the screen or your face was not visible for more than 5 seconds, which violates the assessment integrity policy."
+          ) : disqualificationReason.includes("Environment security violation") || disqualificationReason.includes("High-risk environment") ? (
+            "Our security system detected changes in your environment during the assessment, such as activation of remote access tools or virtual machines, which violates the assessment integrity policy."
+          ) : disqualificationReason.includes("Virtual machine") || disqualificationReason.includes("VMware") || disqualificationReason.includes("VirtualBox") ? (
+            "The assessment was terminated because you are using a virtual machine or virtualization software, which is not allowed for security and integrity reasons."
+          ) : disqualificationReason.includes("Remote access") || disqualificationReason.includes("remote desktop") ? (
+            "The assessment was terminated because remote access or screen sharing software was detected, which violates the assessment security policy."
           ) : (
-            "Our proctoring system detected a potential violation of the assessment integrity policy. This could include looking away from the screen, having your face not visible, or using external resources."
+            "Our proctoring system detected a potential violation of the assessment integrity policy. This could include looking away from the screen, having your face not visible, using external resources, or environment security issues."
           )}
         </p>
       </div>
@@ -89,6 +95,14 @@ const DisqualificationScreen: React.FC<{ assessmentId?: string }> = ({ assessmen
           <li className="flex items-center bg-gray-700/50 rounded-lg p-2.5">
             <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
             Face not visible
+          </li>
+          <li className="flex items-center bg-gray-700/50 rounded-lg p-2.5">
+            <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+            Virtual machines
+          </li>
+          <li className="flex items-center bg-gray-700/50 rounded-lg p-2.5">
+            <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+            Remote access tools
           </li>
           <li className="flex items-center bg-gray-700/50 rounded-lg p-2.5">
             <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>

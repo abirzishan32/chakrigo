@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaCamera, FaEye, FaTimes, FaCheck, FaWindowMaximize, FaClone } from 'react-icons/fa';
+import { FaCamera, FaEye, FaTimes, FaCheck, FaWindowMaximize, FaClone, FaShieldAlt } from 'react-icons/fa';
 import { MdScreenshot } from 'react-icons/md';
 
 interface ProctorConsentModalProps {
@@ -37,7 +37,7 @@ const ProctorConsentModal: React.FC<ProctorConsentModalProps> = ({
 
         <p className="text-gray-300 text-sm mb-5 leading-relaxed">
           Webcam access required for proctoring to ensure academic integrity.
-          The following security measures will be activated:
+          Your environment has been verified for security. The following measures are active:
         </p>
 
         <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 mb-5 overflow-auto max-h-60">
@@ -57,6 +57,10 @@ const ProctorConsentModal: React.FC<ProctorConsentModalProps> = ({
             <li className="flex items-start">
               <FaClone className="text-purple-400 mt-1 mr-2 flex-shrink-0" />
               <span>You cannot copy or select text. It will be monitored</span>
+            </li>
+            <li className="flex items-start">
+              <FaShieldAlt className="text-cyan-400 mt-1 mr-2 flex-shrink-0" />
+              <span>Environment security verified - no virtual machines or remote access detected</span>
             </li>
             
             <li className="flex items-start">

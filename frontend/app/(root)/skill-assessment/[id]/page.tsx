@@ -10,11 +10,14 @@ import { SkillAssessment, AssessmentQuestion } from "@/lib/actions/skill-assessm
 import EyeTrackingProctor from "@/components/skill-assessment/EyeTrackingProctor";
 import ProctorConsentModal from "@/components/skill-assessment/ProctorConsentModal";
 import DisqualificationScreen from "@/components/skill-assessment/DisqualificationScreen";
+import { EnvironmentDetectionProvider } from "@/components/skill-assessment/EnvironmentDetectionProvider";
+import { EnvironmentDetectionModal } from "@/components/skill-assessment/EnvironmentDetectionModal";
+import { useRemoteAccessDetection } from "@/hooks/useRemoteAccessDetection";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 import { generateStudyRecommendationsAgent } from "@/lib/actions/assessment-ai.action";
 
-// Assessment status types
-type AssessmentStatus = "intro" | "in-progress" | "results" | "disqualified";
+  // Assessment status types
+type AssessmentStatus = "intro" | "environment-check" | "in-progress" | "results" | "disqualified";
 
 // User answer type
 type UserAnswer = {
@@ -62,11 +65,27 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
   const [proctorActive, setProctorActive] = useState(false);
   const [showProctorVideo, setShowProctorVideo] = useState(false);
   
+  // Environment detection states
+  const [showEnvironmentModal, setShowEnvironmentModal] = useState(false);
+  const [environmentVerified, setEnvironmentVerified] = useState(false);
+  const [environmentRisk, setEnvironmentRisk] = useState<'low' | 'high'>('low');
+  
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
+  // Environment detection hook
+  const { detectionResult, isLoading: environmentLoading, rerunDetection } = useRemoteAccessDetection();
+
   // Enhance handleCheatingDetected to accept a reason using useCallback
   const handleCheatingDetected = useCallback((reason: string = "Potential academic integrity violation") => {
+    // Log security violation with environment context
+    console.error('Security violation detected:', {
+      reason,
+      assessmentId: params.id,
+      environmentRisk,
+      environmentDetails: detectionResult?.detectionDetails
+    });
+    
     // Stop the timer
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -84,7 +103,7 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
     toast.error(`Assessment terminated due to ${reason}`, {
       duration: 5000,
     });
-  }, [params.id]);
+  }, [params.id, environmentRisk, detectionResult]);
 
   // Add tab switching detection
   useEffect(() => {
@@ -211,6 +230,33 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
     };
   }, [assessmentStatus, handleCheatingDetected]);
 
+  // Continuous environment monitoring during assessment
+  useEffect(() => {
+    if (assessmentStatus !== "in-progress") return;
+
+    const monitoringInterval = setInterval(async () => {
+      // Re-run detection to check for environment changes
+      const newResult = await rerunDetection();
+      
+      // Check if environment changed during assessment (became more risky)
+      if (newResult && (newResult.isRemoteAccess || newResult.isVirtualMachine)) {
+        // Only trigger if we weren't already in high-risk mode
+        if (environmentRisk !== 'high') {
+          console.warn('Environment changed during assessment:', {
+            assessmentId: params.id,
+            previousRisk: environmentRisk,
+            newResult
+          });
+          
+          // Immediate disqualification for environment tampering
+          handleCheatingDetected("Environment security violation detected during assessment");
+        }
+      }
+    }, 30000); // Check every 30 seconds
+
+    return () => clearInterval(monitoringInterval);
+  }, [assessmentStatus, environmentRisk, params.id, handleCheatingDetected, rerunDetection]);
+
   // Fetch assessment data
   useEffect(() => {
     const fetchAssessment = async () => {
@@ -286,6 +332,31 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
     fetchAssessment();
   }, [params.id]);
 
+  // Environment detection effect
+  useEffect(() => {
+    if (assessmentStatus === "environment-check" && detectionResult && !environmentLoading) {
+      const hasSecurityConcerns = detectionResult.isRemoteAccess || detectionResult.isVirtualMachine;
+      
+      if (hasSecurityConcerns) {
+        setEnvironmentRisk('high');
+        setShowEnvironmentModal(true);
+        
+        // Log the security concern
+        console.warn('Environment security concern detected:', {
+          assessmentId: params.id,
+          remoteAccess: detectionResult.isRemoteAccess,
+          virtualMachine: detectionResult.isVirtualMachine,
+          details: detectionResult.detectionDetails
+        });
+      } else {
+        setEnvironmentVerified(true);
+        setEnvironmentRisk('low');
+        // Proceed to consent modal
+        setShowConsentModal(true);
+      }
+    }
+  }, [assessmentStatus, detectionResult, environmentLoading, params.id]);
+
   // Handle timer
   useEffect(() => {
     if (assessmentStatus !== "in-progress" || !assessment) return;
@@ -320,7 +391,7 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
     };
   }, [assessmentStatus, assessment, params.id]);
 
-  // Show webcam consent modal before starting the assessment
+  // Show environment detection before starting the assessment
   const prepareToStartAssessment = () => {
     if (!assessment) {
       toast.error("Assessment data is not available");
@@ -336,8 +407,9 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
       return;
     }
     
-    // Show the consent modal
-    setShowConsentModal(true);
+    // Start environment detection
+    setAssessmentStatus("environment-check");
+    toast.info("Checking environment security...", { duration: 2000 });
   };
   
   // Start the assessment after consent
@@ -359,6 +431,27 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
     }
   };
 
+  // Handle environment detection modal responses
+  const handleEnvironmentProceed = () => {
+    setShowEnvironmentModal(false);
+    setEnvironmentVerified(true);
+    
+    // Log that user proceeded despite risks
+    console.warn('User proceeded with high-risk environment:', {
+      assessmentId: params.id,
+      detectionResult
+    });
+    
+    // Show webcam consent modal
+    setShowConsentModal(true);
+  };
+
+  const handleEnvironmentCancel = () => {
+    setShowEnvironmentModal(false);
+    setAssessmentStatus("intro");
+    toast.error("Assessment cancelled due to environment security concerns");
+  };
+
   // Handle webcam consent
   const handleConsentAccept = () => {
     setShowConsentModal(false);
@@ -367,11 +460,8 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
   
   const handleConsentDecline = () => {
     setShowConsentModal(false);
+    setAssessmentStatus("intro");
     toast.error("Webcam access is required to take this assessment");
-    // Navigate back to the assessment list
-    setTimeout(() => {
-      router.push('/skill-assessment');
-    }, 3000);
   };
 
   // Toggle showing the proctor video
@@ -872,37 +962,46 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 p-8">
-      <div className="max-w-4xl mx-auto">
-        {assessmentStatus === "disqualified" ? (
-          <DisqualificationScreen assessmentId={params.id} />
-        ) : loading ? (
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-800 rounded w-1/4"></div>
-            <div className="h-4 bg-gray-800 rounded w-1/2"></div>
-            <div className="h-64 bg-gray-800 rounded-xl"></div>
-          </div>
-        ) : error ? (
-          <div className="text-center p-8">
-            <div className="text-red-500 py-8">{error}</div>
-            <button
-              onClick={() => router.push('/skill-assessment')}
-              className="mx-auto block px-6 py-3 bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white font-medium rounded-lg shadow-lg shadow-blue-900/20 transition-all duration-200"
-            >
-              Back to Assessments
-            </button>
-          </div>
-        ) : !assessment ? (
-          <div className="text-center p-8">
-            <div className="text-red-500 py-8">Assessment not found</div>
-            <button
-              onClick={() => router.push('/skill-assessment')}
-              className="mx-auto block px-6 py-3 bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white font-medium rounded-lg shadow-lg shadow-blue-900/20 transition-all duration-200"
-            >
-              Back to Assessments
-            </button>
-          </div>
-        ) : assessmentStatus === "intro" ? (
+    <EnvironmentDetectionProvider
+      assessmentId={params.id}
+      onEnvironmentRisk={(riskLevel, details) => {
+        setEnvironmentRisk(riskLevel);
+        if (riskLevel === 'high' && assessmentStatus === "in-progress") {
+          handleCheatingDetected("High-risk environment detected during assessment");
+        }
+      }}
+    >
+      <div className="min-h-screen bg-gray-950 p-8">
+        <div className="max-w-4xl mx-auto">
+          {assessmentStatus === "disqualified" ? (
+            <DisqualificationScreen assessmentId={params.id} />
+          ) : loading ? (
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-gray-800 rounded w-1/4"></div>
+              <div className="h-4 bg-gray-800 rounded w-1/2"></div>
+              <div className="h-64 bg-gray-800 rounded-xl"></div>
+            </div>
+          ) : error ? (
+            <div className="text-center p-8">
+              <div className="text-red-500 py-8">{error}</div>
+              <button
+                onClick={() => router.push('/skill-assessment')}
+                className="mx-auto block px-6 py-3 bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white font-medium rounded-lg shadow-lg shadow-blue-900/20 transition-all duration-200"
+              >
+                Back to Assessments
+              </button>
+            </div>
+          ) : !assessment ? (
+            <div className="text-center p-8">
+              <div className="text-red-500 py-8">Assessment not found</div>
+              <button
+                onClick={() => router.push('/skill-assessment')}
+                className="mx-auto block px-6 py-3 bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white font-medium rounded-lg shadow-lg shadow-blue-900/20 transition-all duration-200"
+              >
+                Back to Assessments
+              </button>
+            </div>
+          ) : assessmentStatus === "intro" ? (
           <div>
             <button
               onClick={() => router.push('/skill-assessment')}
@@ -991,6 +1090,95 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
                   <span>Start Assessment</span>
                   <FaArrowRight className="ml-2 w-4 h-4" />
                 </button>
+              </div>
+            </div>
+          </div>
+        ) : assessmentStatus === "environment-check" ? (
+          <div>
+            <button
+              onClick={() => {
+                setAssessmentStatus("intro");
+                setEnvironmentVerified(false);
+                setShowEnvironmentModal(false);
+              }}
+              className="flex items-center space-x-2 text-blue-400 hover:text-blue-300 mb-8 group"
+            >
+              <FaArrowLeft className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" />
+              <span>Back to Assessment Info</span>
+            </button>
+            
+            <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-xl overflow-hidden">
+              <div className="p-6 border-b border-gray-800">
+                <h1 className="text-2xl font-bold text-white mb-2">Environment Security Check</h1>
+                <p className="text-gray-300 text-sm">Verifying your environment meets security requirements for this assessment</p>
+              </div>
+              
+              <div className="p-6">
+                {environmentLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <h2 className="text-xl font-semibold text-white mb-2">
+                      Analyzing Environment
+                    </h2>
+                    <p className="text-gray-400">
+                      Checking for virtual machines, remote access tools, and other security concerns...
+                    </p>
+                  </div>
+                ) : detectionResult ? (
+                  <div className="text-center py-8">
+                    <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
+                      detectionResult.isRemoteAccess || detectionResult.isVirtualMachine 
+                        ? 'bg-red-500/20 text-red-500' 
+                        : 'bg-green-500/20 text-green-500'
+                    }`}>
+                      {detectionResult.isRemoteAccess || detectionResult.isVirtualMachine ? (
+                        <FaTimes className="w-8 h-8" />
+                      ) : (
+                        <FaCheck className="w-8 h-8" />
+                      )}
+                    </div>
+                    <h2 className="text-xl font-semibold text-white mb-2">
+                      {detectionResult.isRemoteAccess || detectionResult.isVirtualMachine 
+                        ? 'Security Concerns Detected' 
+                        : 'Environment Verified'}
+                    </h2>
+                    <p className="text-gray-400 mb-6">
+                      {detectionResult.isRemoteAccess || detectionResult.isVirtualMachine 
+                        ? 'Your environment may not meet the security requirements for this assessment.' 
+                        : 'Your environment meets all security requirements.'}
+                    </p>
+                    
+                    {!detectionResult.isRemoteAccess && !detectionResult.isVirtualMachine && (
+                      <button
+                        onClick={() => setShowConsentModal(true)}
+                        className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-medium rounded-lg shadow-lg shadow-green-900/20 transition-all duration-200"
+                      >
+                        Continue to Camera Setup
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="text-red-500 mb-4">
+                      <FaTimes className="w-12 h-12 mx-auto" />
+                    </div>
+                    <h2 className="text-xl font-semibold text-white mb-2">
+                      Environment Check Failed
+                    </h2>
+                    <p className="text-gray-400 mb-6">
+                      Unable to verify your environment. Please refresh and try again.
+                    </p>
+                    <button
+                      onClick={() => {
+                        rerunDetection();
+                        toast.info("Retrying environment check...");
+                      }}
+                      className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-all duration-200"
+                    >
+                      Retry Check
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -1315,14 +1503,25 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
             </div>
           </>
         )}
+        
+        {/* Proctor consent modal */}
+        <ProctorConsentModal
+          isOpen={showConsentModal}
+          onAccept={handleConsentAccept}
+          onDecline={handleConsentDecline}
+        />
+        
+        {/* Environment detection modal */}
+        {detectionResult && (
+          <EnvironmentDetectionModal
+            isOpen={showEnvironmentModal}
+            onProceed={handleEnvironmentProceed}
+            onCancel={handleEnvironmentCancel}
+            detectionResult={detectionResult}
+          />
+        )}
       </div>
-      
-      {/* Proctor consent modal */}
-      <ProctorConsentModal
-        isOpen={showConsentModal}
-        onAccept={handleConsentAccept}
-        onDecline={handleConsentDecline}
-      />
-    </div>
+      </div>
+    </EnvironmentDetectionProvider>
   );
 } 
