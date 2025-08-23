@@ -199,7 +199,7 @@ export default function NavigationChatBot() {
     ];
 
     return (
-      <div className="flex flex-col items-center space-y-2 w-full py-2">
+      <div className="flex flex-col items-center space-y-2 w-full ">
         <motion.div 
           animate={{ 
             scale: [1, 1.1, 1],
@@ -284,9 +284,9 @@ export default function NavigationChatBot() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="absolute right-0 top-0 bottom-0 w-[350px] md:w-[380px] pointer-events-auto"
+            className="absolute right-0 top-0 bottom-0 w-[350px] md:w-[380px] pointer-events-auto p-0"
           >
-            <Card className="h-full flex flex-col bg-black/80 backdrop-blur-xl border-l border-y border-r-0 border-gray-700/30 rounded-l-2xl rounded-r-none shadow-2xl">
+            <Card className="h-full flex flex-col bg-black/80 backdrop-blur-xl border-l border-y border-r-0 border-gray-700/30 rounded-l-2xl rounded-r-none shadow-2xl my-0">
               <CardHeader className="bg-gradient-to-r from-primary-100/10 to-blue-600/10 border-b border-gray-700/30 p-4 flex flex-row items-center justify-between gap-2 rounded-tl-2xl backdrop-blur-sm">
                 <div className="flex items-center gap-3">
                   <div className="bg-gradient-to-br from-primary-100 to-blue-600 p-2 rounded-xl shadow-lg">
