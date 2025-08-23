@@ -6,24 +6,25 @@ import { getCurrentUser, signOut } from "@/lib/actions/auth.action";
 import SignOutButton from "@/components/SignOutButton";
 import { NotificationMenu } from "@/components/notifications/NotificationMenu";
 import {
-    Home,
-    Users,
-    FileText,
-    Brain,
-    Bot,
-    ChevronRight,
-    ChevronLeft,
-    Settings,
-    HelpCircle,
-    ScanText,
-    Activity,
-    LogOut,
-    Code,
-    File,
-    BrainCog,
-    FileEdit,
-} from "lucide-react";
-import { motion } from "framer-motion";
+  Home,
+  Users,
+  FileText,
+  Brain,
+  Bot,
+  ChevronRight,
+  ChevronLeft,
+  Settings,
+  HelpCircle,
+  ScanText,
+  Activity,
+  LogOut,
+  Code,
+  File,
+  BrainCog,
+  Route,
+  FileEdit
+} from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface GlobalSidebarProps {
     isSidebarCollapsed: boolean;
@@ -57,81 +58,80 @@ const GlobalSidebar = ({
     const isUserAuth = !!user;
     const isModerator = user?.role === "interview-moderator";
 
-    const sidebarLinks = [
-        {
-            href: "/dashboard",
-            icon: <Home size={20} />,
-            label: "Dashboard",
-            id: "dashboard",
-            pulse: false,
-        },
-        {
-            href: "/interview-home",
-            icon: <Bot size={20} />,
-            label: "AI Interviews",
-            id: "interview-home",
-            pulse: true,
-        },
-        {
-            href: "/skill-assessment",
-            icon: <Brain size={20} />,
-            label: "Skills Analysis",
-            id: "skill-assessment",
-            pulse: false,
-        },
-        {
-            href: "/resume-builder",
-            icon: <FileEdit size={20} />,
-            label: "Resume Builder",
-            id: "resume-builder",
-            pulse: false,
-        },
-        {
-            href: "/resume-analyzer",
-            icon: <ScanText size={20} />,
-            label: "Resume Analyzer",
-            id: "resume-analyzer",
-            pulse: false,
-        },
-        {
-            href: "/career",
-            icon: <Users size={20} />,
-            label: "Community",
-            id: "career",
-            pulse: false,
-        },
-        {
-            href: "/algo-visualizer",
-            icon: <Activity size={20} />,
-            label: "Algorithm Visualizer",
-            id: "algo-visualizer",
-            pulse: false,
-        },
-        {
-            href: "/code-snippet",
-            icon: <Code size={20} />,
-            label: "Code Snippet",
-            id: "code-snippet",
-            pulse: false,
-        },
-        {
-            href: "/system-design",
-            icon: <BrainCog size={20} />,
-            label: "System Design",
-            id: "system-design",
-            pulse: false,
-        },
-    ];
+  const sidebarLinks = [
+    {
+      href: "/dashboard",
+      icon: <Home size={20} />,
+      label: "Dashboard",
+      id: "dashboard"
+    },
+    {
+      href: "/interview-home",
+      icon: <Bot size={20} />,
+      label: "AI Interviews",
+      id: "interview-home"
+    },
+    {
+      href: "/skill-assessment",
+      icon: <Brain size={20} />,
+      label: "Skills Analysis",
+      id: "skill-assessment"
+    },
+    {
+      href: "/resume-builder",
+      icon: <FileEdit size={20} />,
+      label: "Resume Builder",
+      id: "resume-builder"
+    },
+    {
+      href: "/resume-analyzer",
+      icon: <ScanText size={20} />,
+      label: "Resume Analyzer",
+      id: "resume-analyzer"
+    },
+    {
+      href: "/roadmap",
+      icon: <Route size={20} />,
+      label: "Career Roadmap",
+      id: "roadmap"
+    },
+    {
+      href: "/career",
+      icon: <Users size={20} />,
+      label: "Community",
+      id: "career"
+    },
+    {
+      href: "/algo-visualizer",
+      icon: <Activity size={20} />,
+      label: "Algorithm Visualizer",
+      id: "algo-visualizer"
+    },
+    {
+      href: "/code-snippet",
+      icon: <Code size={20} />,
+      label: "Code Snippet",
+      id: "code-snippet"
+    },
 
-    if (isModerator) {
-        sidebarLinks.push({
-            href: "/moderator-dashboard",
-            icon: <Settings size={20} />,
-            label: "Moderator Panel",
-            id: "moderator-dashboard",
-            pulse: false,
-        });
+    {
+      href: "/system-design",
+      icon: <BrainCog size={20} />,
+      label: "System Design",
+      id: "system-design"
     }
+  ];
+
+  if (isModerator) {
+    sidebarLinks.push({
+      href: "/moderator-dashboard",
+      icon: <Settings size={20} />,
+      label: "Moderator Panel",
+      id: "moderator-dashboard"
+    });
+  }
+
+
 
     return (
         <motion.div
@@ -224,20 +224,19 @@ const GlobalSidebar = ({
                     )}
                 </div>
 
-                {/* Navigation Links */}
-                <div className="flex-1 py-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
-                    <nav className="px-2 space-y-1.5">
-                        {sidebarLinks.map((link) => (
-                            <SidebarLink
-                                key={link.id}
-                                href={link.href}
-                                icon={link.icon}
-                                label={link.label}
-                                collapsed={isSidebarCollapsed}
-                                active={link.id === activeSection}
-                                pulse={link.pulse}
-                            />
-                        ))}
+        {/* Navigation Links */}
+        <div className="flex-1 py-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
+          <nav className="px-2 space-y-1.5">
+            {sidebarLinks.map((link) => (
+              <SidebarLink
+                key={link.id}
+                href={link.href}
+                icon={link.icon}
+                label={link.label}
+                collapsed={isSidebarCollapsed}
+                active={link.id === activeSection}
+              />
+            ))}
 
                         <div
                             className={`mt-6 mb-2 ${
@@ -247,16 +246,18 @@ const GlobalSidebar = ({
                             <div className="border-t border-gray-800/40 pt-4"></div>
                         </div>
 
-                        <SidebarLink
-                            href="/help-center"
-                            icon={<HelpCircle size={20} />}
-                            label="Help & Support"
-                            collapsed={isSidebarCollapsed}
-                            active={activeSection === "help-center"}
-                            pulse={false}
-                        />
-                    </nav>
-                </div>
+            <SidebarLink
+              href="/help-center"
+              icon={<HelpCircle size={20} />}
+              label="Help & Support"
+              collapsed={isSidebarCollapsed}
+              active={activeSection === "help-center"}
+            />
+
+          </nav>
+        </div>
+
+
 
                 {/* User Profile */}
                 <div className="p-4 border-t border-gray-800/50 bg-gray-900/50 backdrop-blur-sm">
@@ -315,23 +316,21 @@ const GlobalSidebar = ({
 
 // Enhanced Sidebar link component
 const SidebarLink = ({
-    href,
-    icon,
-    label,
-    collapsed,
-    active,
-    pulse,
-    badge,
-    isNew,
+  href,
+  icon,
+  label,
+  collapsed,
+  active,
+  badge,
+  isNew
 }: {
-    href: string;
-    icon: React.ReactNode;
-    label: string;
-    collapsed: boolean;
-    active: boolean;
-    pulse?: boolean;
-    badge?: string;
-    isNew?: boolean;
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  collapsed: boolean;
+  active: boolean;
+  badge?: string;
+  isNew?: boolean;
 }) => (
     <Link
         href={href}
@@ -352,19 +351,10 @@ const SidebarLink = ({
             />
         )}
 
-        <div className="flex items-center">
-            <div
-                className={`relative ${
-                    active
-                        ? "text-primary-100"
-                        : "text-gray-400 group-hover:text-primary-100"
-                } transition-colors`}
-            >
-                {icon}
-                {pulse && (
-                    <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-primary-100 rounded-full animate-ping opacity-75"></span>
-                )}
-            </div>
+    <div className="flex items-center">
+      <div className={`relative ${active ? 'text-primary-100' : 'text-gray-400 group-hover:text-primary-100'} transition-colors`}>
+        {icon}
+      </div>
 
             {!collapsed && (
                 <span

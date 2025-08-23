@@ -10,6 +10,7 @@ import { SkillAssessment, AssessmentQuestion } from "@/lib/actions/skill-assessm
 import EyeTrackingProctor from "@/components/skill-assessment/EyeTrackingProctor";
 import ProctorConsentModal from "@/components/skill-assessment/ProctorConsentModal";
 import DisqualificationScreen from "@/components/skill-assessment/DisqualificationScreen";
+import AntiCheatingSecurity from "@/components/skill-assessment/AntiCheatingSecurity";
 import { EnvironmentDetectionProvider } from "@/components/skill-assessment/EnvironmentDetectionProvider";
 import { EnvironmentDetectionModal } from "@/components/skill-assessment/EnvironmentDetectionModal";
 import { useRemoteAccessDetection } from "@/hooks/useRemoteAccessDetection";
@@ -126,7 +127,7 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
     };
   }, [assessmentStatus, params.id, handleCheatingDetected]);
 
-  // Prevent screenshots and copying
+  // Prevent screenshots, copying, and page saving
   useEffect(() => {
     if (assessmentStatus !== "in-progress") return;
     
@@ -152,6 +153,48 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
         handleCheatingDetected("Screenshot attempt detected");
         return;
       }
+
+      // Prevent page saving shortcuts
+      // Ctrl+S (Windows/Linux) or Cmd+S (Mac)
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        e.stopPropagation();
+        handleCheatingDetected("Page saving attempt detected");
+        toast.error("Page saving is not allowed during the assessment", { duration: 3000 });
+        return;
+      }
+
+      // Prevent other common save shortcuts
+      // Ctrl+Shift+S / Cmd+Shift+S (Save As)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        e.stopPropagation();
+        handleCheatingDetected("Page saving attempt detected");
+        toast.error("Page saving is not allowed during the assessment", { duration: 3000 });
+        return;
+      }
+
+      // Prevent F12 (Developer Tools)
+      if (e.key === 'F12') {
+        e.preventDefault();
+        handleCheatingDetected("Developer tools access attempt");
+        return;
+      }
+
+      // Prevent Ctrl+Shift+I / Cmd+Opt+I (Developer Tools)
+      if ((e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'i') || 
+          (e.metaKey && e.altKey && e.key.toLowerCase() === 'i')) {
+        e.preventDefault();
+        handleCheatingDetected("Developer tools access attempt");
+        return;
+      }
+
+      // Prevent Ctrl+U / Cmd+U (View Source)
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'u') {
+        e.preventDefault();
+        handleCheatingDetected("View source attempt detected");
+        return;
+      }
     };
     
     // Detect programmatic screenshot attempts
@@ -175,10 +218,13 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
       toast.error("Copying is not allowed during the assessment", { duration: 3000 });
     };
     
-    // Prevent context menu (right-click)
+    // Prevent context menu (right-click) - Enhanced to block all save options
     const preventContextMenu = (e: MouseEvent) => {
       e.preventDefault();
+      e.stopPropagation();
+      handleCheatingDetected("Right-click context menu access attempt");
       toast.error("Right-click is disabled during the assessment", { duration: 3000 });
+      return false;
     };
     
     // Prevent drag events (for dragging images or content)
@@ -215,6 +261,99 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
     
     // Apply programmatic screenshot detection
     const cleanupProgrammaticDetection = detectProgrammaticScreenshot();
+
+    // Prevent page saving through browser APIs and menu actions
+    const preventPageSaving = () => {
+      // Override the browser's save functionality
+      const originalExecCommand = document.execCommand;
+      document.execCommand = function(command: string, showUI?: boolean, value?: string) {
+        if (command === 'SaveAs' || command === 'Save') {
+          handleCheatingDetected("Page saving attempt through execCommand");
+          return false;
+        }
+        return originalExecCommand.call(this, command, showUI, value);
+      };
+
+      // Prevent beforeunload events that might indicate saving attempts
+      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        // Allow normal navigation away from the page but log it
+        if (assessmentStatus === "in-progress") {
+          console.warn("User attempting to leave assessment page");
+          // Don't prevent it entirely, but we could log this as suspicious behavior
+        }
+      };
+
+      // Override file download APIs
+      const originalCreateObjectURL = URL.createObjectURL;
+      URL.createObjectURL = function(object: Blob | MediaSource) {
+        // Allow specific blob types that might be needed for legitimate assessment functionality
+        if (object instanceof Blob) {
+          // Block HTML or document blobs that could be used for saving page content
+          if (object.type.includes('text/html') || 
+              object.type.includes('application/x-mhtml') ||
+              object.type.includes('text/plain')) {
+            handleCheatingDetected("Blob creation attempt for page content");
+            throw new Error('Blob creation blocked by assessment security policy');
+          }
+        }
+        return originalCreateObjectURL.call(this, object);
+      };
+
+      // Override link download attribute
+      const preventDownloadLinks = (e: Event) => {
+        const target = e.target as HTMLElement;
+        if (target.tagName === 'A' && target.hasAttribute('download')) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleCheatingDetected("Download link activation attempt");
+          return false;
+        }
+      };
+
+      // Add click listener to catch download attempts
+      document.addEventListener('click', preventDownloadLinks, true);
+      window.addEventListener('beforeunload', handleBeforeUnload);
+
+      // Block specific browser menu actions through focus events
+      const blockBrowserMenus = () => {
+        // When the window loses focus, it might indicate the user is accessing browser menus
+        let focusLostTime = 0;
+        const handleBlur = () => {
+          focusLostTime = Date.now();
+        };
+        
+        const handleFocus = () => {
+          const timeAway = Date.now() - focusLostTime;
+          // If focus was lost for more than 100ms but less than 5 seconds, it might be menu access
+          if (timeAway > 100 && timeAway < 5000 && assessmentStatus === "in-progress") {
+            console.warn("Potential browser menu access detected", { timeAway });
+            // Don't immediately disqualify for this, but log it as suspicious
+          }
+        };
+
+        window.addEventListener('blur', handleBlur);
+        window.addEventListener('focus', handleFocus);
+
+        return () => {
+          window.removeEventListener('blur', handleBlur);
+          window.removeEventListener('focus', handleFocus);
+        };
+      };
+
+      const cleanupMenuBlocking = blockBrowserMenus();
+
+      // Return cleanup function
+      return () => {
+        document.execCommand = originalExecCommand;
+        URL.createObjectURL = originalCreateObjectURL;
+        document.removeEventListener('click', preventDownloadLinks, true);
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+        cleanupMenuBlocking();
+      };
+    };
+
+    // Apply page saving prevention
+    const cleanupPageSavingPrevention = preventPageSaving();
     
     // Cleanup
     return () => {
@@ -227,6 +366,7 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
       document.removeEventListener('drop', preventDrag as any);
       document.body.classList.remove('no-select');
       cleanupProgrammaticDetection();
+      cleanupPageSavingPrevention();
     };
   }, [assessmentStatus, handleCheatingDetected]);
 
@@ -972,6 +1112,13 @@ export default function AssessmentPage({ params }: { params: { id: string } }) {
       }}
     >
       <div className="min-h-screen bg-gray-950 p-8">
+        {/* Anti-cheating security component */}
+        <AntiCheatingSecurity
+          isActive={assessmentStatus === "in-progress"}
+          onViolationDetected={handleCheatingDetected}
+          assessmentId={params.id}
+        />
+        
         <div className="max-w-4xl mx-auto">
           {assessmentStatus === "disqualified" ? (
             <DisqualificationScreen assessmentId={params.id} />
