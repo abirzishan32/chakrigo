@@ -14,6 +14,7 @@ import {
   ChevronRight,
   ChevronLeft,
   Settings,
+  ClipboardPenLine,
   HelpCircle,
   ScanText,
   Activity,
@@ -96,16 +97,22 @@ const GlobalSidebar = ({
       id: "roadmap"
     },
     {
-      href: "/career",
-      icon: <Users size={20} />,
-      label: "Community",
-      id: "career"
-    },
-    {
       href: "/algo-visualizer",
       icon: <Activity size={20} />,
       label: "Algorithm Visualizer",
       id: "algo-visualizer"
+    },
+    {
+      href: "/system-design",
+      icon: <BrainCog size={20} />,
+      label: "System Design",
+      id: "system-design"
+    },
+    {
+        href: "/whiteboard",
+        icon: <ClipboardPenLine size={20} />,
+        label: "Whiteboard",
+        id: "whiteboard"
     },
     {
       href: "/code-snippet",
@@ -113,13 +120,12 @@ const GlobalSidebar = ({
       label: "Code Snippet",
       id: "code-snippet"
     },
-
     {
-      href: "/system-design",
-      icon: <BrainCog size={20} />,
-      label: "System Design",
-      id: "system-design"
-    }
+      href: "/career",
+      icon: <Users size={20} />,
+      label: "Community",
+      id: "career"
+    },
   ];
 
   if (isModerator) {
