@@ -8,6 +8,7 @@ import {
   getHashForString,
   TLAssetStore,
   TLBookmarkAsset,
+  toRichText,
   uniqueId,
   createTLStore,
   defaultShapeUtils,
@@ -34,16 +35,40 @@ const CodeEditor = dynamic(
   { ssr: false }
 );
 
-// Simple asset store for local development
+// Enhanced asset store for local development
 const localAssets: TLAssetStore = {
   async upload(_asset, file) {
-    const url = URL.createObjectURL(file);
-    return { src: url };
+    try {
+      // Validate that file is a proper File or Blob object
+      if (!file || typeof file !== 'object') {
+        console.error('Invalid file object provided:', file);
+        throw new Error('Invalid file object');
+      }
+      
+      // Convert file to data URL
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = reader.result as string;
+          console.log('Asset uploaded successfully, data URL length:', dataUrl.length);
+          resolve({ src: dataUrl });
+        };
+        reader.onerror = () => {
+          reject(new Error('Failed to read file'));
+        };
+        reader.readAsDataURL(file as Blob);
+      });
+    } catch (error) {
+      console.error('Error uploading asset:', error);
+      throw error;
+    }
   },
   resolve(asset) {
+    console.log('Resolving asset:', asset.id, 'src length:', asset.props.src?.length);
     return asset.props.src;
   },
 };
+
 
 async function unfurlBookmarkUrl({
   url,
@@ -212,94 +237,98 @@ export default function AIWhiteboard() {
     }
   };
 
-  const handleInsertDiagram = useCallback(() => {
-    if (renderedSVG && editorRef.current) {
-      try {
-        const editor = editorRef.current;
-        const { width, height } = editor.getViewportScreenBounds();
+const handleInsertDiagram = useCallback(async () => {
+  if (renderedSVG && editorRef.current) {
+    try {
+      const editor = editorRef.current;
+      const { width, height } = editor.getViewportScreenBounds();
 
-        // Create a temporary DOM element to parse the SVG dimensions
-        const parser = new DOMParser();
-        const svgDoc = parser.parseFromString(renderedSVG, "image/svg+xml");
-        const svgElement = svgDoc.documentElement;
+      // Create a temporary DOM element to parse the SVG dimensions
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(renderedSVG, "image/svg+xml");
+      const svgElement = svgDoc.documentElement;
 
-        // Get SVG dimensions from viewBox or width/height attributes
-        let svgWidth = parseFloat(svgElement.getAttribute("width") || "300");
-        let svgHeight = parseFloat(svgElement.getAttribute("height") || "200");
+      // Get SVG dimensions from viewBox or width/height attributes
+      let svgWidth = parseFloat(svgElement.getAttribute("width") || "300");
+      let svgHeight = parseFloat(svgElement.getAttribute("height") || "200");
 
-        // If there's a viewBox, use that for dimensions
-        const viewBox = svgElement.getAttribute("viewBox");
-        if (viewBox) {
-          const [, , vbWidth, vbHeight] = viewBox.split(" ").map(parseFloat);
-          if (!isNaN(vbWidth) && !isNaN(vbHeight)) {
-            svgWidth = vbWidth;
-            svgHeight = vbHeight;
-          }
+      // If there's a viewBox, use that for dimensions
+      const viewBox = svgElement.getAttribute("viewBox");
+      if (viewBox) {
+        const [, , vbWidth, vbHeight] = viewBox.split(" ").map(parseFloat);
+        if (!isNaN(vbWidth) && !isNaN(vbHeight)) {
+          svgWidth = vbWidth;
+          svgHeight = vbHeight;
         }
-
-        // Calculate aspect ratio
-        const aspectRatio = svgWidth / svgHeight;
-
-        // Set dimensions while preserving aspect ratio
-        // Use a maximum width of 500px for better visibility
-        const maxWidth = Math.min(500, width * 0.6);
-        const imageWidth = maxWidth;
-        const imageHeight = maxWidth / aspectRatio;
-
-        // Convert SVG to base64 data URL
-        const svgBase64 = `data:image/svg+xml;base64,${btoa(
-          unescape(encodeURIComponent(renderedSVG))
-        )}`;
-
-        // Create a temporary image to ensure the SVG loads properly
-        const img = new Image();
-        img.onload = () => {
-          // Create asset ID first
-          const assetId = AssetRecordType.createId();
-
-          // First create the asset record with base64 data URL
-          editor.createAssets([
-            {
-              id: assetId,
-              type: "image",
-              typeName: "asset",
-              props: {
-                name: "diagram.svg",
-                src: svgBase64,
-                w: imageWidth,
-                h: imageHeight,
-                mimeType: "image/svg+xml",
-                isAnimated: false,
-              },
-              meta: {},
-            },
-          ]);
-
-          // Then create the image shape with that asset
-          editor.createShape({
-            type: "image",
-            // Center the image in the viewport
-            x: width / 2 - imageWidth / 2,
-            y: height / 2 - imageHeight / 2,
-            props: {
-              assetId,
-              w: imageWidth,
-              h: imageHeight,
-            },
-          });
-
-          // Close the modal
-          setShowDiagramModal(false);
-          setDiagramDescription("");
-          setMermaidCode("");
-          setRenderedSVG(null);
-        };
-        img.src = svgBase64;
-      } catch (error) {
-        console.error("Error creating image asset:", error);
       }
+
+      // Calculate aspect ratio and dimensions
+      const aspectRatio = svgWidth / svgHeight;
+      const maxWidth = Math.min(500, width * 0.6);
+      const imageWidth = maxWidth;
+      const imageHeight = maxWidth / aspectRatio;
+
+      // Create SVG data URL with proper encoding
+      const cleanSVG = renderedSVG
+        .replace(/xmlns="[^"]*"/g, '') // Remove existing xmlns
+        .replace(/<svg/, '<svg xmlns="http://www.w3.org/2000/svg"'); // Add proper xmlns
+
+      const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(cleanSVG)}`;
+
+      // Create asset ID
+      const assetId = AssetRecordType.createId();
+
+      // Create the asset record directly with SVG data URL
+      const asset = {
+        id: assetId,
+        type: "image" as const,
+        typeName: "asset" as const,
+        props: {
+          name: "diagram.svg",
+          src: svgDataUrl,
+          w: imageWidth,
+          h: imageHeight,
+          mimeType: "image/svg+xml",
+          isAnimated: false,
+        },
+        meta: {},
+      };
+
+      // Create the asset first
+      await editor.createAssets([asset]);
+
+      // Wait a moment for the asset to be created
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Create the image shape
+      const shapeId = editor.createShape({
+        type: "image",
+        x: width / 2 - imageWidth / 2,
+        y: height / 2 - imageHeight / 2,
+        props: {
+          assetId,
+          w: imageWidth,
+          h: imageHeight,
+        },
+      });
+
+      console.log("Created shape with ID:", shapeId);
+      console.log("Asset ID:", assetId);
+      console.log("Asset data URL length:", svgDataUrl.length);
+
+      // Close the modal
+      setShowDiagramModal(false);
+      setDiagramDescription("");
+      setMermaidCode("");
+      setRenderedSVG(null);
+
+    } catch (error) {
+      console.error("Error creating image asset:", error);
+      alert("Failed to insert diagram. Please try again.");
     }
-  }, [renderedSVG]);
+  }
+}, [renderedSVG]);
+
 
   const captureWhiteboard = async () => {
     if (!editorRef.current) return;
@@ -333,6 +362,9 @@ export default function AIWhiteboard() {
         try {
           const base64data = reader.result as string;
 
+          // Send only the base64 data part (remove the prefix)
+          //const base64Content = base64data.split(",")[1];
+
           // Send the image to the API for summarization
           const response = await fetch("/api/whiteboard", {
             method: "POST",
@@ -364,16 +396,21 @@ export default function AIWhiteboard() {
             const noteWidth = Math.min(500, Math.max(300, Math.sqrt(summaryText.length) * 20));
             const noteHeight = Math.max(100, estimatedLineCount * 20); // 20px per line
             
-            // Create a text shape with the AI summary
+            // Create a note shape with the AI summary
             editor.createShape({
-              type: "text",
+              type: "geo",
               x: width / 2 - noteWidth / 2,
-              y: height / 2 + 50,
+              y: height / 2 + 50, // Position below center
               props: {
-                text: summaryText,
+                richText: toRichText(summaryText),
                 color: "green",
                 size: "m",
+                geo: "rectangle",
+                labelColor: "black",
+                fill: "none",
+                dash: "draw",
                 w: noteWidth,
+                h: noteHeight,
               },
             });
           } else {
@@ -399,7 +436,6 @@ export default function AIWhiteboard() {
     editor.registerExternalAssetHandler("url", unfurlBookmarkUrl);
   };
 
-  // Custom UI overrides for tldraw
   const uiOverrides: TLUiOverrides = {
     tools(editor, tools) {
       return tools;
