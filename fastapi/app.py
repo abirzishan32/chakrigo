@@ -30,7 +30,7 @@ app = FastAPI(
 
 cors_origins = [
     "http://localhost:3000",
-    "https://chakrigo.herokuapp.com",
+    "https://chakrigo-240946f06d7b.herokuapp.com/",
 ]
 
 if os.getenv("CORS_ORIGINS"):
