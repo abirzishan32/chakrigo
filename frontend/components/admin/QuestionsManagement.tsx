@@ -117,18 +117,21 @@ const QuestionsManagement = ({ interviewId, questions: initialQuestions }: Quest
                         {editingIndex === index ? (
                             <div className="flex flex-col space-y-2">
                                 <textarea
+                                    placeholder="Edit your question"
                                     value={editingText}
                                     onChange={(e) => setEditingText(e.target.value)}
                                     className="w-full bg-black border border-gray-700 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-primary-100 min-h-[80px]"
                                 />
                                 <div className="flex justify-end space-x-2">
                                     <button
+                                        title='Cancel Edit'
                                         onClick={() => setEditingIndex(null)}
                                         className="text-gray-400 hover:text-gray-300"
                                     >
                                         <X className="h-4 w-4" />
                                     </button>
                                     <button
+                                        title='Save Changes'
                                         onClick={updateQuestion}
                                         className="text-primary-100 hover:text-primary-200"
                                     >
@@ -142,12 +145,14 @@ const QuestionsManagement = ({ interviewId, questions: initialQuestions }: Quest
                                 {isEditing && (
                                     <div className="flex space-x-2 ml-4">
                                         <button
+                                            title='Edit Question'
                                             onClick={() => editQuestion(index)}
                                             className="text-blue-400 hover:text-blue-300"
                                         >
                                             <Edit className="h-4 w-4" />
                                         </button>
                                         <button
+                                            title='Delete Question'
                                             onClick={() => deleteQuestion(index)}
                                             className="text-red-400 hover:text-red-300"
                                         >

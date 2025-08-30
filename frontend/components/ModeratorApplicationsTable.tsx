@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import type { ModeratorApplication } from '@/types';
 
 interface ModeratorApplicationsTableProps {
   applications: ModeratorApplication[];

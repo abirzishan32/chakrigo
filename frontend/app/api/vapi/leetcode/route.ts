@@ -73,9 +73,9 @@ export async function POST(request: Request){
             model: google('gemini-2.0-flash-001'),
             prompt: `Prepare interview questions for a LeetCode coding interview about this problem:
 
-Problem Title: ${problem.title}
-Difficulty: ${problem.difficulty}
-Problem Description: ${problem.content.replace(/<[^>]*>/g, '')}
+Problem Title: ${problem?.title}
+Difficulty: ${problem?.difficulty}
+Problem Description: ${problem?.content.replace(/<[^>]*>/g, '')}
 
 ${solution ? `Optimal Solution Approach: ${solution.content}` : ''}
 
@@ -130,8 +130,8 @@ DO NOT include any text before or after the JSON array.
             } else {
                 // Last resort fallback: create generic questions
                 parsedQuestions = [
-                    `Can you explain your understanding of the ${problem.title} problem?`,
-                    `What approach would you use to solve this ${problem.difficulty} level problem?`,
+                    `Can you explain your understanding of the ${problem?.title} problem?`,
+                    `What approach would you use to solve this ${problem?.difficulty} level problem?`,
                     "What's the time and space complexity of your solution?",
                     "How would you handle edge cases in your solution?",
                     "Can you walk through your implementation step by step?"
@@ -142,8 +142,8 @@ DO NOT include any text before or after the JSON array.
         // Create the interview document with only the specified fields
         const lc_interview = {
             type: 'leetcode',
-            problemTitle: problem.title,
-            problemDifficulty: problem.difficulty,
+            problemTitle: problem?.title,
+            problemDifficulty: problem?.difficulty,
             problemSlug: problemSlug,
             language: language || 'C++',
             questions: parsedQuestions,

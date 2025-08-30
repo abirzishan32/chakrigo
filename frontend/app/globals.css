@@ -223,6 +223,15 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -351,7 +360,7 @@
   }
 
   .root-layout {
-    @apply flex mx-auto max-w-7xl flex-col gap-12 my-12 px-16 max-sm:px-4 max-sm:my-8;
+    @apply flex flex-col gap-12 mt-8 max-sm:px-4;
   }
 
   .card-cta {
@@ -828,6 +837,7 @@
   border-radius: 4px;
   font-size: 12px;
   z-index: 9999;
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
 

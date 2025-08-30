@@ -63,6 +63,7 @@ const InterviewTechStackTab = ({ techstack, onChange }: InterviewTechStackTabPro
                                 >
                                     {tech}
                                     <button
+                                        title={`Remove ${tech}`}
                                         onClick={() => removeTech(tech)}
                                         className="ml-2 text-gray-400 hover:text-white"
                                     >

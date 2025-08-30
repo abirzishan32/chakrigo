@@ -12,7 +12,7 @@ interface CompanyExperiencesProps {
 }
 
 export default function CompanyExperiences({ companyName }: CompanyExperiencesProps) {
-  const [experiences, setExperiences] = useState<CareerExperience[]>([]);
+  const [experiences, setExperiences] = useState<CareerExperience[] | undefined>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +23,7 @@ export default function CompanyExperiences({ companyName }: CompanyExperiencesPr
         const result = await getCareerExperiencesByCompany(companyName);
         
         if (result.success) {
-          setExperiences(result.data);
+          setExperiences(result?.data);
         } else {
           setError(result.message || "Failed to load experiences");
         }
@@ -60,7 +60,7 @@ export default function CompanyExperiences({ companyName }: CompanyExperiencesPr
     );
   }
 
-  if (experiences.length === 0) {
+  if (!experiences || experiences.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
         <Building className="h-12 w-12 text-gray-500 mb-4" />

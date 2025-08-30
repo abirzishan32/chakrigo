@@ -142,7 +142,7 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
             </div>
           </div>
           
-          <button className="text-gray-500 hover:text-gray-300 transition-colors p-1">
+          <button title="More" className="text-gray-500 hover:text-gray-300 transition-colors p-1">
             <MoreHorizontal className="h-5 w-5" />
           </button>
         </div>

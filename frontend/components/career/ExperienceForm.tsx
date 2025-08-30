@@ -174,6 +174,7 @@ export default function ExperienceForm({ userId }: ExperienceFormProps) {
               onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addQuestion())}
             />
             <button
+              title="Add Question"
               type="button"
               onClick={addQuestion}
               className="p-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white"
@@ -189,7 +190,8 @@ export default function ExperienceForm({ userId }: ExperienceFormProps) {
                 {questions.map((q, index) => (
                   <li key={index} className="flex items-center justify-between bg-gray-800 rounded-md p-2 pl-3 border border-gray-700">
                     <span className="text-gray-300">{q}</span>
-                    <button 
+                    <button
+                      title="Remove Question"
                       type="button" 
                       onClick={() => removeQuestion(index)} 
                       className="text-gray-500 hover:text-red-500"

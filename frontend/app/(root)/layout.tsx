@@ -21,7 +21,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
     // Check if current path is homepage or auth pages
     const isHomePage = pathname === "/";
     const isAuthPage =
-        pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
+        pathname?.startsWith("/sign-in") || pathname?.startsWith("/sign-up");
     const shouldShowSidebar = !isHomePage && !isAuthPage;
 
     useEffect(() => {
@@ -262,7 +262,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
                 </AnimatePresence>
 
                 {/* Add padding to account for fixed navbar */}
-                <div className="pt-16">{children}</div>
+                <div>{children}</div>
             </div>
         );
     }

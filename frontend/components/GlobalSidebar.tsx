@@ -114,12 +114,12 @@ const GlobalSidebar = ({
         label: "Whiteboard",
         id: "whiteboard"
     },
-    {
-      href: "/code-snippet",
-      icon: <Code size={20} />,
-      label: "Code Snippet",
-      id: "code-snippet"
-    },
+    // {
+    //   href: "/code-snippet",
+    //   icon: <Code size={20} />,
+    //   label: "Code Snippet",
+    //   id: "code-snippet"
+    // },
     {
       href: "/career",
       icon: <Users size={20} />,

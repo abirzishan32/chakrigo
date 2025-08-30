@@ -191,7 +191,7 @@ export default function SystemDesignPage() {
   };
 
   return (
-    <div className="relative flex flex-col h-[calc(100vh-4rem)] overflow-hidden bg-gradient-to-b from-gray-900 to-black">
+    <div className="relative flex flex-col h-screen overflow-hidden bg-gradient-to-b from-gray-900 to-black">
       {/* Background effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>

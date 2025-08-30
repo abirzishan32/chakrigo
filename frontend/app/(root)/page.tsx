@@ -19,7 +19,7 @@ export default async function HomePage() {
         <div className="absolute -top-40 -right-40 h-96 w-96 bg-primary-100 opacity-20 blur-[150px] rounded-full z-0"></div>
         <div className="absolute top-1/2 left-1/3 h-80 w-80 bg-blue-700 opacity-20 blur-[150px] rounded-full z-0"></div>
         
-        <div className="w-full px-6 md:px-12 relative z-10">
+        <div className="w-full px-6 max-lg:py-12 relative z-10 max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12 max-w-[2000px] mx-auto">
             <div className="lg:w-1/2 space-y-8">
               <div className="inline-block bg-gradient-to-r from-primary-100 to-blue-600 bg-clip-text">
@@ -256,7 +256,7 @@ export default async function HomePage() {
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-100 to-blue-600 rounded-lg blur opacity-30"></div>
                 <div className="relative bg-gradient-to-br from-gray-900 to-black border border-gray-800 rounded-lg shadow-2xl overflow-hidden">
                   <Image 
-                    src="/resume.jpg"
+                    src="/resume.png"
                     alt="Resume Builder Preview"
                     width={600}
                     height={400}

@@ -4,6 +4,7 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Eye, Globe, Lock } from 'lucide-react';
 import Link from 'next/link';
+import type { Interview } from '@/types';
 
 interface InterviewPublishingTabProps {
     formData: Partial<Interview>;

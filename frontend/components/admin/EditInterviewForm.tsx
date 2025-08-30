@@ -16,6 +16,7 @@ import InterviewDetailsTab from '@/components/admin/edit-interview/InterviewDeta
 import InterviewQuestionsTab from '@/components/admin/edit-interview/InterviewQuestionsTab';
 import InterviewTechStackTab from '@/components/admin/edit-interview/InterviewTechStackTab';
 import InterviewPublishingTab from '@/components/admin/edit-interview/InterviewPublishingTab';
+import type { Interview } from '@/types';
 
 interface EditInterviewFormProps {
     interview: Interview;

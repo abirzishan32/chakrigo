@@ -8,13 +8,13 @@ import { Search, Filter } from 'lucide-react';
 const InterviewSearchFilter = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+    const [searchQuery, setSearchQuery] = useState(searchParams?.get('search') || '');
     const [isPending, startTransition] = useTransition();
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const params = new URLSearchParams(searchParams.toString());
+        const params = new URLSearchParams(searchParams?.toString());
 
         if (searchQuery) {
             params.set('search', searchQuery);

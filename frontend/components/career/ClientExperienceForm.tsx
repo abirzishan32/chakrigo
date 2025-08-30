@@ -272,6 +272,7 @@ export default function ClientExperienceForm() {
                 </div>
               </div>
               <button
+                title="Collapse"
                 type="button"
                 onClick={() => {
                   setExpanded(false);
@@ -462,6 +463,7 @@ export default function ClientExperienceForm() {
                       >
                         <span className="text-gray-300 text-sm">{q}</span>
                         <button
+                          title="Remove Question"
                           type="button"
                           onClick={() => removeQuestion(index)}
                           className="text-gray-500 hover:text-red-400 p-1 transition-colors"

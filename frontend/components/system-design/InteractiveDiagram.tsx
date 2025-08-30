@@ -427,8 +427,8 @@ export function InteractiveDiagram({ plantUML, d3Components, onSave, onEdit }: I
                     setIsDragging(false);
                     if (!event.active) simulation.alphaTarget(0);
                     if (!isEditMode) {
-                        d.fx = null;
-                        d.fy = null;
+                        d.fx = undefined;
+                        d.fy = undefined;
                     }
                 }));
 
@@ -647,6 +647,7 @@ export function InteractiveDiagram({ plantUML, d3Components, onSave, onEdit }: I
                     {/* Theme Selector */}
                     <div className="bg-black/50 backdrop-blur-sm rounded-lg p-1">
                         <select
+                            title="Select Theme"
                             value={theme}
                             onChange={(e) => handleThemeChange(e.target.value as 'default' | 'dark' | 'colorful')}
                             className="bg-transparent text-white text-xs border-none outline-none"

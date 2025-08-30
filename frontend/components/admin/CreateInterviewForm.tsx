@@ -115,6 +115,7 @@ const CreateInterviewForm = ({ adminId, adminName }: CreateInterviewFormProps) =
                 <div className="space-y-2">
                     <label className="block text-sm font-medium text-white">Interview Type</label>
                     <select
+                        title="Select Interview Type"
                         name="type"
                         value={formData.type}
                         onChange={handleChange}
@@ -142,6 +143,7 @@ const CreateInterviewForm = ({ adminId, adminName }: CreateInterviewFormProps) =
                 <div className="space-y-2">
                     <label className="block text-sm font-medium text-white">Experience Level</label>
                     <select
+                        title="Select Experience Level"
                         name="experienceLevel"
                         value={formData.experienceLevel}
                         onChange={handleChange}

@@ -8,6 +8,7 @@ import { deleteInterview } from '@/lib/actions/admin.action';
 import { useRouter } from 'next/navigation';
 import QuestionsManagement from '@/components/admin/QuestionsManagement';
 import React from 'react';
+import type { Interview } from '@/types';
 
 interface InterviewManagementTableProps {
     interviews: Interview[];

@@ -97,6 +97,7 @@ export default function QuestionForm({
           Question Type
         </label>
         <select
+          title="Select Question Type"
           value={formData.type}
           onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
           className="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]"
@@ -112,6 +113,7 @@ export default function QuestionForm({
           Question Text
         </label>
         <textarea
+          title="Enter Question Text"
           value={formData.question}
           onChange={(e) => setFormData({ ...formData, question: e.target.value })}
           className="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -145,6 +147,7 @@ export default function QuestionForm({
                 required
               />
               <input
+                title="Is Correct"
                 type="checkbox"
                 checked={option.isCorrect}
                 onChange={(e) => handleOptionChange(index, "isCorrect", e.target.checked)}
@@ -182,6 +185,7 @@ export default function QuestionForm({
           Points
         </label>
         <input
+          title="Enter Points"
           type="number"
           value={formData.points}
           onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}

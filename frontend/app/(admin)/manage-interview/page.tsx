@@ -20,7 +20,7 @@ const ManageInterviewPage = async ({ searchParams }: PageProps) => {
     const { interviews: fetchedInterviews } = await getAllInterviews();
 
     // Map fetched interviews to ensure they strictly match the Interview interface
-    const interviews: Interview[] = fetchedInterviews.map(interview => ({
+    const interviews = fetchedInterviews.map(interview => ({
         id: interview.id,
         role: interview.role || "",
         level: interview.level || "",
