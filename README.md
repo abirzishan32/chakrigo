@@ -1,4 +1,4 @@
-# 🚀 Candid Minds : AI-Powered Job Interview Preparation and Anti-Cheating Hiring Platform
+# 🚀 ChakriGO : AI-Powered Job Interview Preparation and Anti-Cheating Hiring Platform
 
 A comprehensive, next-generation platform that revolutionizes career development through AI-powered interviews, resume optimization, skill assessments, and community-driven learning.
 
