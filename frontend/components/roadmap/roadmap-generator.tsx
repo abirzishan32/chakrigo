@@ -63,7 +63,8 @@ export function RoadmapGenerator() {
     });
 
     try {
-      const response = await fetch("http://localhost:8000/roadmap/generate-stream", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${apiUrl}/roadmap/generate-stream`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

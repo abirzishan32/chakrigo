@@ -3,7 +3,7 @@
 import { z } from "zod";
 
 // API URL from environment or default to FastAPI's standard port 8000
-const FASTAPI_URL = process.env.FLASK_SERVER_URL || 'http://localhost:8000';
+const FASTAPI_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // Schema for animation response validation
 const animationResponseSchema = z.object({
@@ -39,9 +39,7 @@ export async function generateAnimationCode(prompt: string): Promise<AnimationRe
 
     try {
       // Using absolute URL with proper protocol
-      const apiUrl = FASTAPI_URL.startsWith('http') 
-        ? `${FASTAPI_URL}/generate-animation`
-        : `http://${FASTAPI_URL}/generate-animation`;
+      const apiUrl = `${FASTAPI_URL}/generate-animation`
       
       console.log(`Final request URL: ${apiUrl}`);
       
