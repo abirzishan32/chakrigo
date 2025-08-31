@@ -5,6 +5,7 @@ import {generateObject} from "ai";
 import {google} from "@ai-sdk/google";
 import {feedbackSchema} from "@/constants";
 import { getCurrentUser } from "./auth.action";
+import type { Feedback, Interview, CreateFeedbackParams, CreateModeratorApplicationParams, GetFeedbackByInterviewIdParams, GetLatestInterviewsParams } from "@/types";
 
 export async function createFeedback(params: CreateFeedbackParams) {
   const { interviewId, userId, transcript, feedbackId } = params;

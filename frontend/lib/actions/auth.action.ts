@@ -3,6 +3,7 @@
 import { auth, db } from "@/firebase/admin";
 import { cookies } from "next/headers";
 import {dateTimestampInSeconds} from "@sentry/core";
+import type { User, SignUpParams, SignInParams, SetUserRoleParams } from "@/types";
 
 // Session duration (1 week)
 const SESSION_DURATION = 60 * 60 * 24 * 7;

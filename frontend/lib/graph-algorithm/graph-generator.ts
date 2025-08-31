@@ -1,5 +1,5 @@
 import Graph from 'graphology';
-import { GraphData } from '@/components/bfs/types';
+import { GraphData } from '@/components/algo-visualizer/bfs/types';
 
 // Generate a random graph
 export function generateRandomGraph(

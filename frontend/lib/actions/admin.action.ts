@@ -4,6 +4,7 @@ import { db } from "@/firebase/admin";
 import { getRandomInterviewCover } from "@/lib/utils";
 import { isAdmin } from "./auth.action";
 import {dateTimestampInSeconds} from "@sentry/core";
+import type { Interview, ModeratorApplication } from "@/types";
 
 interface CreateCustomInterviewParams {
     role: string;

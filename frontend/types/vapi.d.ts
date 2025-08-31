@@ -44,21 +44,6 @@ interface FunctionCallResultMessage extends BaseMessage {
   };
 }
 
-interface LeetCodeProblem {
-  id: string;
-  title: string;
-  content: string;
-  difficulty: string;
-  slug: string;
-  tags: string[];
-}
-
-interface LeetCodeInterviewSession {
-  problemId: string;
-  messages: Message[];
-  startTime: Date;
-  endTime?: Date;
-}
 
 type Message =
   | TranscriptMessage

@@ -1,4 +1,3 @@
-import google.generativeai as genai
 import os
 import re
 import subprocess
@@ -7,7 +6,7 @@ import tempfile
 import json
 import logging
 from pathlib import Path
-from typing import Optional, Tuple, Dict, Any, Generator
+from typing import Optional, Dict, Any, Generator
 from dotenv import load_dotenv
 from langgraph.graph import StateGraph, END
 from langchain_core.prompts import ChatPromptTemplate
@@ -19,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
+
+HEROKU_MODE = os.getenv("HEROKU_MODE", "false").lower() == "true"
 
 class AnimationGenerationSystem:
     def __init__(self, media_dir: Path):
@@ -200,6 +201,25 @@ class AnimationGenerationSystem:
             animation_id = str(uuid.uuid4())[:8]
             
             logger.info(f"Rendering animation with ID: {animation_id}")
+            
+            if HEROKU_MODE:
+                logger.info("Deployment mode: Skipping actual manim rendering")
+                
+                # Create mock output file for deployment
+                mock_filename = f"{animation_id}.mp4"
+                mock_file_path = self.media_dir / "videos" / "animation_code" / "1080p60" / mock_filename
+                mock_file_path.parent.mkdir(parents=True, exist_ok=True)
+                
+                # Create a small placeholder file
+                with open(mock_file_path, "w") as f:
+                    f.write("Mock video file for deployment - Manim rendering not available on Heroku")
+                
+                return {
+                    **state,
+                    "animation_id": animation_id,
+                    "video_url": f"/media/videos/animation_code/1080p60/{mock_filename}",
+                    "stage": "render_complete",
+                }
             
             # Create a temporary directory for the code
             with tempfile.TemporaryDirectory() as temp_dir:

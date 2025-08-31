@@ -1,4 +1,4 @@
-import { DijkstraStep } from '@/components/dijkstra/types';
+import { DijkstraStep } from '@/components/algo-visualizer/dijkstra/types';
 import Graph from 'graphology';
 
 // Helper to find the minimum distance node not yet visited
@@ -7,7 +7,7 @@ function findMinDistanceNode(
     visited: Set<string>
 ): string | null {
     let minDistance = Infinity;
-    let minNode = null;
+    let minNode: string | null = null;
 
     for (const node in distances) {
         if (!visited.has(node) && distances[node] < minDistance) {

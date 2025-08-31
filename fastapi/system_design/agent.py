@@ -5,8 +5,7 @@ import logging
 import uuid
 import base64
 import zlib
-from pathlib import Path
-from typing import Optional, Dict, Any, Generator
+from typing import Dict, Any, Generator
 from dotenv import load_dotenv
 from langgraph.graph import StateGraph, END
 from langchain_core.prompts import ChatPromptTemplate

@@ -128,7 +128,7 @@ const serializeFirestoreData = (data: any) => {
         
         if (isArrayLike) {
           // Convert to a proper array
-          const array = [];
+          const array: any[] = [];
           for (let i = 0; i < keys.length; i++) {
             const item = serialized[key][i];
             array.push(typeof item === 'object' && item !== null ? 
@@ -282,7 +282,7 @@ export async function getSkillAssessmentById(id: string) {
         console.log(`No questions found by assessmentId, trying question IDs: ${assessment.questions.length} IDs`);
         
         // Firestore "in" queries have a limit of 10 items, so we may need to do multiple queries
-        const chunks = [];
+        const chunks: any[] = [];
         const questionIds = assessment.questions;
         for (let i = 0; i < questionIds.length; i += 10) {
           chunks.push(questionIds.slice(i, i + 10));

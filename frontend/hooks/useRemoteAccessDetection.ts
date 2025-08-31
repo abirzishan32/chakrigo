@@ -552,11 +552,10 @@ export const useRemoteAccessDetection = () => {
     // Enhanced security report for assessment system
     getSecurityReport: useCallback(() => {
       if (!detectionResult) return null;
-      
-      const threats = [];
-      const warnings = [];
-      const info = [];
-      
+      const threats: string[] = [];
+      const warnings: string[] = [];
+      const info: string[] = [];
+
       if (detectionResult.chromeRemoteDesktop) {
         threats.push('Chrome Remote Desktop detected');
       }

@@ -384,8 +384,16 @@ export async function generateStudyRecommendationsAgent(params: {
     }
     
     // For each identified topic, find learning resources
-    const enhancedTopics = [];
-    
+    const enhancedTopics: {
+      topic: string;
+      description: string;
+      relevance: string;
+      resources: {
+        title: string;
+        type: string;
+      }[];
+    }[] = [];
+
     for (const topic of topicsData.topics) {
       console.log(`Finding resources for topic: ${topic.name}`);
       

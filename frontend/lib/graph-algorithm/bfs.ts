@@ -1,4 +1,4 @@
-import { BFSStep } from '@/components/bfs/types';
+import { BFSStep } from '@/components/algo-visualizer/bfs/types';
 import Graph from 'graphology';
 
 export function generateBFSSteps(graph: Graph, startNodeId: string): BFSStep[] {

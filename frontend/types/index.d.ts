@@ -273,18 +273,7 @@ interface LeetCodeInterview {
   createdAt: string;
 }
 
-interface CodeSnippet {
-  id: string;
-  title: string;
-  description?: string;
-  code: string;
-  language: string;
-  tags?: string[];
-  folderId: string | null;
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
-}
+
 
 interface CodeFolder {
   id: string;

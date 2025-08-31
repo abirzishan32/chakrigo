@@ -1,13 +1,10 @@
+# Core FastAPI dependencies
 fastapi
 uvicorn[standard]
 python-multipart
 python-dotenv
-google-generativeai
-manim
+# manim
 pydantic
-Pillow
-numpy
-scipy
 
 # LangGraph and LangChain dependencies
 langgraph
@@ -21,9 +18,3 @@ aiofiles
 # PlantUML encoding
 requests
 six
-plantuml
-
-chromadb
-sentence-transformers
-aiofiles
-python-multipart

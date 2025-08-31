@@ -51,7 +51,7 @@ export default function AlgorithmExplanation({
           <div className="bg-gray-50 dark:bg-gray-700 p-2 rounded">
             <div className="font-medium">Queue</div>
             <div className="truncate">
-              {currentStep?.queue?.length > 0 ? currentStep.queue.join(', ') : 'Empty'}
+              {currentStep?.queue?.length && currentStep?.queue?.length > 0 ? currentStep?.queue?.join(', ') : 'Empty'}
             </div>
           </div>
           <div className="col-span-2 bg-gray-50 dark:bg-gray-700 p-2 rounded">

@@ -134,7 +134,7 @@ export async function runNavigationAgent(query: string) {
       console.error("Error parsing navigation agent response:", parseError);
       
       // Fallback logic for handling invalid JSON with ChakriGO platform awareness
-      let navigate = null;
+      let navigate:string | null = null;
       let response = "I'm not sure where you want to go. Could you be more specific about which ChakriGO feature you'd like to access?";
       
       // Enhanced fallback logic to handle ChakriGO platform features

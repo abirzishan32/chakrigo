@@ -1,4 +1,4 @@
-import { DFSStep } from '@/components/dfs/types';
+import { DFSStep } from '@/components/algo-visualizer/dfs/types';
 import Graph from 'graphology';
 
 export function generateDFSSteps(graph: Graph, startNodeId: string): DFSStep[] {
