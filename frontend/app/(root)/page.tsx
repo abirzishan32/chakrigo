@@ -95,7 +95,7 @@ export default async function HomePage() {
               },
               {
                 icon: <FileText className="h-8 w-8 text-primary-100" />,
-                title: "ATS Resume Builder",
+                title: "Resume Builder",
                 description: "Create modern, ATS-friendly resumes with our AI-powered builder that optimizes your resume for both humans and automated systems."
               },
               {
