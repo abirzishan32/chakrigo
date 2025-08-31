@@ -6,7 +6,7 @@ A comprehensive, next-generation platform that revolutionizes career development
 ## ✨ Features
 
 ### 🤖 AI-Powered Interview System
-- **Real-time Voice Interviews**: Conduct practice interviews with AI using advanced voice recognition
+- **Real-time Voice Interviews**: Conduct practice interviews with AI using advanced voice recognition system
 - **Anti-Cheating Measures**: Eye-tracking and tab-focus monitoring using face-api.js and TensorFlow
 - **Instant Feedback**: Get detailed performance analysis and improvement suggestions
 - **Multiple Interview Types**: Technical, behavioral, and role-specific interviews
