@@ -248,7 +248,7 @@ export default function NavigationChatBot() {
   };
 
   return (
-    <div className="fixed right-0 top-0 bottom-0 z-40 pointer-events-none">
+    <div className="fixed right-0 top-0 bottom-0 z-40 pointer-events-none z-100">
       {/* Tab button on the right edge - only visible when panel is closed */}
       <AnimatePresence>
         {!isOpen && (
@@ -284,9 +284,9 @@ export default function NavigationChatBot() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="absolute right-0 top-0 bottom-0 w-[350px] md:w-[380px] pointer-events-auto p-0"
+            className="absolute right-0 top-0 bottom-0 w-[350px] md:w-[380px] pointer-events-auto"
           >
-            <Card className="h-full flex flex-col bg-black/80 backdrop-blur-xl border-l border-y border-r-0 border-gray-700/30 rounded-l-2xl rounded-r-none shadow-2xl my-0">
+            <Card className="m-0 h-full flex flex-col bg-black/80 backdrop-blur-xl border-l border-y border-r-0 border-gray-700/30 rounded-l-2xl rounded-r-none shadow-2xl py-0">
               <CardHeader className="bg-gradient-to-r from-primary-100/10 to-blue-600/10 border-b border-gray-700/30 p-4 flex flex-row items-center justify-between gap-2 rounded-tl-2xl backdrop-blur-sm">
                 <div className="flex items-center gap-3">
                   <div className="bg-gradient-to-br from-primary-100 to-blue-600 p-2 rounded-xl shadow-lg">
@@ -311,8 +311,8 @@ export default function NavigationChatBot() {
                 </Button>
               </CardHeader>
               
-              <ScrollArea className="flex-1 overflow-y-auto">
-                <CardContent className="p-4">
+                <CardContent className="p-4 flex-1">
+                  <ScrollArea>
                   <div className="space-y-4">
                     {messages.map((message, index) => (
                       <div
@@ -357,10 +357,11 @@ export default function NavigationChatBot() {
                     ))}
                     <div ref={messagesEndRef} />
                   </div>
-                </CardContent>
+                
               </ScrollArea>
+              </CardContent>
               
-              <CardFooter className="border-t border-gray-700/30 p-3 bg-black/40 backdrop-blur-sm rounded-bl-2xl">
+              <CardFooter className="border-t rounded-bl-2xl pb-6">
                 <form onSubmit={handleSubmit} className="flex w-full gap-2">
                   <Input
                     placeholder="Ask me anything about ChakriGO..."

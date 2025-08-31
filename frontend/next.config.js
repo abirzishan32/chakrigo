@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  //output: 'standalone',
-  devIndicators: false,
+  output: 'standalone',
+  // devIndicators: false,
   images: {
     remotePatterns: [
       {
@@ -27,4 +27,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;
