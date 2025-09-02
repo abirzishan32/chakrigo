@@ -1,92 +1,210 @@
+import os
+import asyncio
+import tempfile
+import json
+import logging
+import shutil
+from typing import Optional
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from pathlib import Path
-from typing import Optional
-import json
-import asyncio
-from .agent import AnimationGenerationSystem, AnimationAgent
 
-# Create router
+# Import your existing modules
+from .script_generator import script_generator
+from .main_code_generator import manim_generator
+from .animation_creator import create_animation_from_code
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/ai-animation", tags=["AI Animation"])
-
-# Initialize the animation system
-MEDIA_DIR = Path("media")
-animation_system = AnimationGenerationSystem(MEDIA_DIR)
-animation_agent = AnimationAgent(MEDIA_DIR)  # Legacy support
 
 class AnimationRequest(BaseModel):
     prompt: str
 
 class AnimationResponse(BaseModel):
-    code: str
-    explanation: str
+    status: str
+    message: str
     video_url: Optional[str] = None
-
-class StreamingAnimationRequest(BaseModel):
-    prompt: str
+    analysis: Optional[dict] = None
+    code: Optional[str] = None
+    error: Optional[str] = None
 
 @router.post("/generate", response_model=AnimationResponse)
 async def generate_animation(request: AnimationRequest):
     """
-    Generate an AI-powered animation based on user prompt (non-streaming)
+    Generate a video animation from a text prompt using Manim and Gemini.
     
-    Args:
-        request: AnimationRequest containing the user's prompt
-        
-    Returns:
-        AnimationResponse with generated code, explanation, and video URL
+    Workflow:
+    1. User provides text prompt
+    2. Generate educational breakdown using Gemini
+    3. Create Manim code using Gemini
+    4. Render video using Manim
+    5. Return video URL
     """
-    if not request.prompt or not request.prompt.strip():
-        raise HTTPException(status_code=400, detail="Prompt is required and cannot be empty")
-    
     try:
-        result = animation_system.create_animation(request.prompt.strip())
+        logger.info(f"Received animation request: {request.prompt}")
+        
+        # Check if generators are initialized
+        if script_generator is None:
+            raise HTTPException(
+                status_code=500,
+                detail="Script generator not initialized. Please check GOOGLE_GENERATIVE_AI_API_KEY in environment variables."
+            )
+        
+        if manim_generator is None:
+            raise HTTPException(
+                status_code=500,
+                detail="Manim generator not initialized. Please check GOOGLE_GENERATIVE_AI_API_KEY in environment variables."
+            )
+        
+        # Step 1: Generate educational breakdown and video plan
+        logger.info("Step 1: Generating educational breakdown...")
+        video_plan = script_generator.generate_complete_video_plan(request.prompt)
+        
+        if not video_plan:
+            raise HTTPException(
+                status_code=400, 
+                detail="Failed to generate educational breakdown from prompt"
+            )
+        
+        # Step 2: Generate Manim code
+        logger.info("Step 2: Generating Manim code...")
+        manim_code = manim_generator.generate_3b1b_manim_code(video_plan)
+        
+        if not manim_code:
+            raise HTTPException(
+                status_code=400, 
+                detail="Failed to generate Manim code"
+            )
+        
+        # Step 3: Create animation video
+        logger.info("Step 3: Rendering animation...")
+        video_path = create_animation_from_code(manim_code)
+        
+        if not video_path:
+            raise HTTPException(
+                status_code=500, 
+                detail="Failed to render animation video"
+            )
+        
+        # Convert absolute path to relative URL
+        media_dir = Path("media")
+        video_path_obj = Path(video_path)
+        
+        # Find relative path from media directory
+        try:
+            relative_path = video_path_obj.relative_to(media_dir.absolute())
+            video_url = f"/media/{relative_path}"
+        except ValueError:
+            # If video is not in media directory, copy it there
+            import shutil
+            filename = video_path_obj.name
+            new_path = media_dir / "videos" / filename
+            new_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(video_path, new_path)
+            video_url = f"/media/videos/{filename}"
+        
+        logger.info(f"Animation generated successfully: {video_url}")
         
         return AnimationResponse(
-            code=result["code"],
-            explanation=result["explanation"],
-            video_url=result["video_url"]
+            status="success",
+            message="Animation generated successfully",
+            video_url=video_url,
+            analysis=video_plan.get("educational_breakdown"),
+            code=manim_code
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Error in generate_animation: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error generating animation: {str(e)}")
+        logger.error(f"Error generating animation: {str(e)}")
+        return AnimationResponse(
+            status="error",
+            message="Failed to generate animation",
+            error=str(e)
+        )
 
 @router.post("/generate-stream")
-async def generate_animation_stream(request: StreamingAnimationRequest):
+async def generate_animation_stream(request: AnimationRequest):
     """
-    Generate an AI-powered animation with streaming progress updates
-    
-    Args:
-        request: StreamingAnimationRequest containing the user's prompt
-        
-    Returns:
-        Server-sent events stream with progress updates
+    Generate animation with streaming progress updates.
     """
-    if not request.prompt or not request.prompt.strip():
-        raise HTTPException(status_code=400, detail="Prompt is required and cannot be empty")
-    
-    async def event_stream():
+    async def generate():
         try:
-            for update in animation_system.create_animation_stream(request.prompt.strip()):
-                # Format as Server-Sent Events
-                event_data = json.dumps(update)
-                yield f"data: {event_data}\n\n"
-                
-                # Small delay to prevent overwhelming the client
-                await asyncio.sleep(0.1)
-                
+            # Check if generators are initialized
+            if script_generator is None:
+                yield f"data: {json.dumps({'status': 'error', 'error': 'Script generator not initialized. Please check GOOGLE_GENERATIVE_AI_API_KEY.'})}\n\n"
+                return
+            
+            if manim_generator is None:
+                yield f"data: {json.dumps({'status': 'error', 'error': 'Manim generator not initialized. Please check GOOGLE_GENERATIVE_AI_API_KEY.'})}\n\n"
+                return
+            
+            # Initial response
+            yield f"data: {json.dumps({'status': 'in_progress', 'progress': 0, 'stage': 'starting', 'stage_description': 'Initializing animation generation...'})}\n\n"
+            
+            # Step 1: Educational breakdown
+            yield f"data: {json.dumps({'status': 'in_progress', 'progress': 20, 'stage': 'analysis', 'stage_description': 'Analyzing prompt and creating educational breakdown...'})}\n\n"
+            
+            video_plan = script_generator.generate_complete_video_plan(request.prompt)
+            if not video_plan:
+                yield f"data: {json.dumps({'status': 'error', 'error': 'Failed to generate educational breakdown'})}\n\n"
+                return
+            
+            # Step 2: Code generation
+            yield f"data: {json.dumps({'status': 'in_progress', 'progress': 50, 'stage': 'code_generation', 'stage_description': 'Generating Manim animation code...'})}\n\n"
+            
+            manim_code = manim_generator.generate_3b1b_manim_code(video_plan)
+            if not manim_code:
+                yield f"data: {json.dumps({'status': 'error', 'error': 'Failed to generate Manim code'})}\n\n"
+                return
+            
+            # Step 3: Video rendering
+            yield f"data: {json.dumps({'status': 'in_progress', 'progress': 80, 'stage': 'rendering', 'stage_description': 'Rendering video animation...'})}\n\n"
+            
+            video_path = create_animation_from_code(manim_code)
+            if not video_path:
+                yield f"data: {json.dumps({'status': 'error', 'error': 'Failed to render video'})}\n\n"
+                return
+            
+            # Process video URL
+            media_dir = Path("media")
+            video_path_obj = Path(video_path)
+            
+            try:
+                relative_path = video_path_obj.relative_to(media_dir.absolute())
+                video_url = f"/media/{relative_path}"
+            except ValueError:
+                import shutil
+                filename = video_path_obj.name
+                new_path = media_dir / "videos" / filename
+                new_path.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(video_path, new_path)
+                video_url = f"/media/videos/{filename}"
+            
+            # Final success response
+            final_response = {
+                'status': 'complete',
+                'progress': 100,
+                'stage': 'complete',
+                'stage_description': 'Animation generated successfully!',
+                'video_url': video_url,
+                'analysis': video_plan.get("educational_breakdown"),
+                'code': manim_code,
+                'explanation': f"Successfully generated animation for: {request.prompt}"
+            }
+            
+            yield f"data: {json.dumps(final_response)}\n\n"
+            
         except Exception as e:
-            error_data = json.dumps({
-                "status": "error",
-                "error": f"Error generating animation: {str(e)}",
-                "progress": -1
-            })
-            yield f"data: {error_data}\n\n"
+            logger.error(f"Streaming error: {str(e)}")
+            yield f"data: {json.dumps({'status': 'error', 'error': str(e)})}\n\n"
     
     return StreamingResponse(
-        event_stream(),
+        generate(),
         media_type="text/plain",
         headers={
             "Cache-Control": "no-cache",
@@ -96,75 +214,72 @@ async def generate_animation_stream(request: StreamingAnimationRequest):
         }
     )
 
-@router.get("/media-info")
-async def get_media_info():
-    """
-    Get information about files in the media directory for debugging
-    
-    Returns:
-        Dictionary with media directory contents
-    """
-    try:
-        return animation_system.get_media_info()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting media info: {str(e)}")
-
 @router.get("/health")
 async def health_check():
-    """
-    Health check endpoint for the AI animation service
-    
-    Returns:
-        Status information
-    """
-    return {
-        "status": "healthy",
-        "service": "AI Animation Generator (LangGraph)",
-        "media_directory": str(MEDIA_DIR.absolute()),
-        "features": [
-            "LangGraph workflow",
-            "Streaming progress updates",
-            "Multi-stage processing",
-            "Advanced prompt analysis"
-        ]
-    }
+    """Health check endpoint."""
+    return {"status": "healthy", "service": "AI Animation Generator"}
 
-@router.get("/workflow-info")
-async def get_workflow_info():
-    """
-    Get information about the LangGraph workflow stages
-    
-    Returns:
-        Dictionary with workflow information
-    """
-    return {
-        "workflow_stages": [
-            {
-                "stage": "analyze_prompt",
-                "description": "Analyze user request and determine animation requirements",
-                "outputs": ["animation_type", "complexity", "key_concepts", "manim_objects"]
-            },
-            {
-                "stage": "generate_code", 
-                "description": "Generate optimized Manim code based on analysis",
-                "outputs": ["generated_code", "explanation"]
-            },
-            {
-                "stage": "sanitize_code",
-                "description": "Validate and secure the generated code",
-                "outputs": ["sanitized_code"]
-            },
-            {
-                "stage": "render_animation",
-                "description": "Render the animation using Manim",
-                "outputs": ["video_url", "animation_id"]
-            }
-        ],
-        "benefits": [
-            "Better error handling and recovery",
-            "Progress tracking through stages",
-            "Structured prompt analysis",
-            "Optimized code generation",
-            "Secure code execution"
-        ]
-    }
+@router.post("/test-prompt")
+async def test_prompt_analysis(request: AnimationRequest):
+    """Test endpoint to analyze prompt without generating video."""
+    try:
+        if script_generator is None:
+            raise HTTPException(
+                status_code=500,
+                detail="Script generator not initialized. Please check GOOGLE_GENERATIVE_AI_API_KEY."
+            )
+            
+        video_plan = script_generator.generate_complete_video_plan(request.prompt)
+        
+        if not video_plan:
+            raise HTTPException(status_code=400, detail="Failed to analyze prompt")
+        
+        return {
+            "status": "success",
+            "analysis": video_plan.get("educational_breakdown"),
+            "manim_structure": video_plan.get("manim_structure")
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error analyzing prompt: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+
+@router.post("/test-code-generation")
+async def test_code_generation(request: AnimationRequest):
+    """Test endpoint to generate Manim code without rendering."""
+    try:
+        if script_generator is None:
+            raise HTTPException(
+                status_code=500,
+                detail="Script generator not initialized. Please check GOOGLE_GENERATIVE_AI_API_KEY."
+            )
+            
+        if manim_generator is None:
+            raise HTTPException(
+                status_code=500,
+                detail="Manim generator not initialized. Please check GOOGLE_GENERATIVE_AI_API_KEY."
+            )
+        
+        # Generate video plan
+        video_plan = script_generator.generate_complete_video_plan(request.prompt)
+        if not video_plan:
+            raise HTTPException(status_code=400, detail="Failed to generate video plan")
+        
+        # Generate Manim code
+        manim_code = manim_generator.generate_3b1b_manim_code(video_plan)
+        if not manim_code:
+            raise HTTPException(status_code=400, detail="Failed to generate Manim code")
+        
+        return {
+            "status": "success",
+            "code": manim_code,
+            "analysis": video_plan.get("educational_breakdown")
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error generating code: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Code generation failed: {str(e)}")

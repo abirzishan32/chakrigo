@@ -18,3 +18,8 @@ aiofiles
 # PlantUML encoding
 requests
 six
+
+
+sympy
+sympy
+moviepy
