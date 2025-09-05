@@ -3,7 +3,7 @@ fastapi
 uvicorn[standard]
 python-multipart
 python-dotenv
-# manim
+manim
 pydantic
 
 # LangGraph and LangChain dependencies
@@ -19,7 +19,3 @@ aiofiles
 requests
 six
 
-
-sympy
-sympy
-moviepy

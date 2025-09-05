@@ -129,6 +129,7 @@ dmypy.json
 
 # Media files (generated content) - IMPORTANT: These should not be in version control
 media/
+trial_media/
 uploads/
 static/user-uploads/
 temp/

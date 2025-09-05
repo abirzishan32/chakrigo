@@ -37,21 +37,21 @@ class LLMClient:
     
     def fix_manim_code(self, manim_code, error_message=None):
         """
-        Direct fix of Manim code using LLM
+        Direct fix of Manim code using LLM, specifically avoiding LaTeX elements
         
         Args:
             manim_code (str): The Manim code to fix
             error_message (str, optional): Specific error message if available
             
         Returns:
-            str: Fixed Manim code
+            str: Fixed Manim code without LaTeX dependencies
         """
         if self.llm is None:
-            print("LLM not available, returning original code")
-            return manim_code
+            print("LLM not available, applying basic LaTeX removal")
+            return self.remove_latex_elements(manim_code)
         
         try:
-            # Create prompt for fixing the code
+            # Create prompt for fixing the code with LaTeX avoidance
             if error_message:
                 prompt = f"""Fix this Manim Python code that has the following error:
 
@@ -60,17 +60,31 @@ ERROR: {error_message}
 MANIM CODE TO FIX:
 {manim_code}
 
-Return only the corrected Python code with proper Manim syntax."""
+CRITICAL REQUIREMENTS:
+- Replace ALL MathTex, Tex, and LaTeX elements with Text objects
+- Use plain text instead of mathematical notation
+- No LaTeX dependencies allowed
+- Convert equations to readable text format (e.g., "x^2" instead of LaTeX)
+
+Return only the corrected Python code with proper Manim syntax and NO LaTeX."""
             else:
                 prompt = f"""Review and fix this Manim Python code to ensure it compiles and runs correctly:
 
 MANIM CODE:
 {manim_code}
 
-Return only the corrected Python code with proper Manim syntax."""
+CRITICAL REQUIREMENTS:
+- Replace ALL MathTex, Tex, and LaTeX elements with Text objects
+- Use plain text instead of mathematical notation  
+- No LaTeX dependencies allowed
+- Convert equations to readable text format (e.g., "x^2" instead of LaTeX)
+
+Return only the corrected Python code with proper Manim syntax and NO LaTeX."""
             
             # Direct LLM call using HumanMessage only (Gemini doesn't support SystemMessage)
             combined_prompt = f"""You are an expert Manim code fixer. Return only corrected Python code, no explanations or markdown.
+
+CRITICAL: Avoid ALL LaTeX elements (MathTex, Tex). Use only Text objects.
 
 {prompt}"""
             
@@ -89,17 +103,64 @@ Return only the corrected Python code with proper Manim syntax."""
             if fixed_code.endswith("```"):
                 fixed_code = fixed_code[:-3]
             
-            return fixed_code.strip()
+            # Apply LaTeX removal as fallback
+            fixed_code = self.remove_latex_elements(fixed_code.strip())
+            
+            return fixed_code
             
         except Exception as e:
             print(f"Error fixing code with LLM: {e}")
-            return manim_code
+            return self.remove_latex_elements(manim_code)
+    
+    def remove_latex_elements(self, manim_code):
+        """
+        Remove LaTeX elements from Manim code and replace with Text objects
+        
+        Args:
+            manim_code (str): Original Manim code that may contain LaTeX
+            
+        Returns:
+            str: Modified code without LaTeX dependencies
+        """
+        import re
+        
+        def replace_mathtex(match):
+            content = match.group(1).replace("\\", "").replace("^", "**").replace("_", "")
+            return f'Text("{content}", font_size=36)'
+        
+        def replace_tex(match):
+            content = match.group(1).replace("\\", "").replace("^", "**").replace("_", "")
+            return f'Text("{content}", font_size=24)'
+        
+        # Replace MathTex with Text
+        manim_code = re.sub(
+            r'MathTex\([^)]*r["\']([^"\']*)["\'][^)]*\)',
+            replace_mathtex,
+            manim_code
+        )
+        
+        # Replace Tex with Text
+        manim_code = re.sub(
+            r'Tex\([^)]*r["\']([^"\']*)["\'][^)]*\)',
+            replace_tex,
+            manim_code
+        )
+        
+        # Replace any remaining MathTex or Tex references
+        manim_code = re.sub(r'MathTex\([^)]*\)', 'Text("Mathematical Expression", font_size=36)', manim_code)
+        manim_code = re.sub(r'Tex\([^)]*\)', 'Text("Text Element", font_size=24)', manim_code)
+        
+        # Remove LaTeX imports that might cause issues
+        manim_code = re.sub(r'from manim import.*TeX.*', 'from manim import *', manim_code)
+        
+        return manim_code
 
 llm_client = LLMClient()
 
 def validate_and_fix_manim_code(manim_code, max_attempts=5):
     """
-    Validates Manim code through compilation and fixes errors using LLM feedback
+    Validates Manim code through compilation and fixes errors using LLM feedback,
+    specifically removing LaTeX elements that cause runtime errors.
     
     Args:
         manim_code: Generated Manim code string
@@ -109,8 +170,11 @@ def validate_and_fix_manim_code(manim_code, max_attempts=5):
         tuple: (validated_code, success_status, error_log)
     """
     
+    # First, immediately remove LaTeX elements to prevent runtime errors
+    current_code = llm_client.remove_latex_elements(manim_code)
+    print("✓ LaTeX elements removed from Manim code")
+    
     attempt = 0
-    current_code = manim_code
     error_history = []
     
     while attempt < max_attempts:

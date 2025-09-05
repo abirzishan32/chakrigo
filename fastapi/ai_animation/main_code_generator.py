@@ -821,7 +821,9 @@ Study these examples to understand how REAL Manim animations are constructed:
 - Create custom functions for complex mathematical visualizations
 - Use axes.plot() for mathematical functions and axes.get_area() for regions
 - Implement SurroundingRectangle() for highlighting elements
-- Use MathTex() for mathematical expressions and Text() for regular text
+- Use Text() for ALL text elements including mathematical expressions
+- Convert formulas to readable text (e.g., "x^2 + y^2 = r^2")
+- NO LaTeX, MathTex, or Tex objects allowed
 - Apply proper color schemes and opacity for visual clarity
 - Use .set_z_index() to control layering of objects
 - Master custom updater functions for real-time curve generation
@@ -1126,7 +1128,7 @@ center_arrow = Arrow(LEFT*1.5, RIGHT*1.5).shift(UP*1)    # Connects them
 
 ✅ CORRECT - Responsive scaling:
 ```python
-long_equation = MathTex("Very long mathematical equation here")
+long_equation = Text("Very long mathematical equation here", font_size=20)
 if long_equation.get_width() > 10:  # Check if too wide
     long_equation.scale(10 / long_equation.get_width())  # Scale to fit
 long_equation.shift(ORIGIN)  # Position in safe center area
@@ -1152,11 +1154,11 @@ self.play(Write(explanation), Create(arrow))
 ✅ CORRECT - Progressive complexity:
 ```python
 # Start simple
-basic_formula = MathTex("a + b").shift(UP*2)
+basic_formula = Text("a + b", font_size=24).shift(UP*2)
 self.play(Write(basic_formula))
 
 # Add complexity with animation
-complex_formula = MathTex("a^2 + 2ab + b^2").shift(UP*2)
+complex_formula = Text("a^2 + 2ab + b^2", font_size=24).shift(UP*2)
 self.play(Transform(basic_formula, complex_formula))
 
 # Show visual proof below
@@ -1188,7 +1190,7 @@ VALID SCENE METHODS TO USE:
 
 USE INSTEAD:
 - Text() for descriptions and labels
-- MathTex() for mathematical expressions
+- Text() for ALL text including mathematical expressions
 - Circle(), Rectangle(), Line() for diagrams
 - Color-coded shapes to represent concepts
 - Animated text reveals and transformations
@@ -2139,6 +2141,15 @@ Use these animation techniques:
             🎯 ULTRA-SPECIFIC MANIM OBJECT GUIDELINES:
             ═══════════════════════════════════════════════════════════════
             
+            🚨 CRITICAL: NO LaTeX ELEMENTS ALLOWED 🚨
+            ═══════════════════════════════════════════════
+            - NEVER use MathTex() or Tex() objects
+            - Use Text() for ALL text elements including math
+            - Convert equations to readable text format
+            - Example: "x^2 + y^2 = r^2" instead of LaTeX
+            - Example: "integral from a to b" instead of LaTeX symbols
+            ═══════════════════════════════════════════════
+            
             Circle():
             ✅ Circle() - default radius
             ✅ Circle(radius=2) - custom radius  
@@ -2158,8 +2169,8 @@ Use these animation techniques:
             
             Text():
             ✅ Text("Hello") - basic text
-            ✅ Text("Hello", font_size=24) - with font size
-            ✅ Text("Hello", font_size=20).set_color(RED) - with color
+            ✅ Text("x^2 + y^2 = r^2", font_size=24) - math as text
+            ✅ Text("Formula: E = mc^2", font_size=20).set_color(RED) - with color
             ❌ Text("Hello", color=RED) - color not in constructor
             ❌ Text("Hello", font="Arial") - font parameter doesn't exist
             
@@ -2169,10 +2180,11 @@ Use these animation techniques:
             ❌ Line([0,0], [1,1]) - use np.array format
             ❌ Line(start_point=ORIGIN) - wrong parameter name
             
-            MathTex():
-            ✅ MathTex("x^2 + y^2 = r^2") - LaTeX formula
-            ✅ MathTex("\\frac{a}{b}", font_size=36) - with size
-            ❌ MathTex("x^2", color=BLUE) - color not in constructor
+            Mathematical Expressions:
+            ✅ Text("x^2 + y^2 = r^2") - LaTeX-free math formula
+            ✅ Text("sin(theta) = opposite/hypotenuse", font_size=36) - trigonometry as text
+            ❌ MathTex("x^2 + y^2 = r^2") - LaTeX not allowed
+            ❌ Tex("\\frac{a}{b}") - LaTeX not allowed
             
             ═══════════════════════════════════════════════════════════════
             ⚡ ANIMATION METHOD VALIDATION:

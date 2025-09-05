@@ -123,7 +123,7 @@ Please execute the following 6-step educational breakdown process:
 - For each step, define:
   * Clear title and description
   * Key concepts to introduce
-  * Any mathematical equations (in LaTeX format)
+  * Any mathematical equations (in plain text format)
   * Real-world examples or applications
   * Common misconceptions to address
 
@@ -170,7 +170,7 @@ Provide your complete analysis as a properly formatted JSON object following thi
             "step_title": "Clear, descriptive title for this step",
             "description": "Detailed explanation of what this step covers (100-150 words)",
             "key_concepts": ["primary concept", "secondary concept"],
-            "equations": ["LaTeX formatted equations if applicable"],
+            "equations": ["Plain text formatted equations if applicable"],
             "data_points": ["Relevant statistics, measurements, or facts"],
             "real_world_examples": ["Example 1", "Example 2"],
             "common_misconceptions": ["Misconception and its correction"],
