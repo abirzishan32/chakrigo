@@ -304,20 +304,20 @@ export default function AlgoVisualizerPage() {
       {/* Noise texture overlay */}
       <div className="fixed inset-0 opacity-[0.02] pointer-events-none bg-noise" />
       
-      <div className="relative container mx-auto py-16 px-4">
+      <div className="relative container mx-auto py-6 px-4">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-20">
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 tracking-tight">
+          {/* Header - More Compact */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight">
               <span className="bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
                 Algorithm
               </span>
-              <br />
+              {" "}
               <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                 Visualizer
               </span>
             </h1>
-            <p className="text-xl text-gray-400 max-w-4xl mx-auto leading-relaxed font-light">
+            <p className="text-base text-gray-400 max-w-3xl mx-auto leading-relaxed font-light">
               Master computational thinking through immersive visualizations. 
               Explore curated algorithms or create custom animations with AI assistance.
             </p>
@@ -325,64 +325,64 @@ export default function AlgoVisualizerPage() {
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="flex justify-center mb-16">
+            <div className="flex justify-center mb-8">
               <TabsList className="grid grid-cols-2 bg-gray-900/50 backdrop-blur-xl border border-gray-800 rounded-2xl p-2 shadow-2xl h-auto">
                 <TabsTrigger 
                   value="stock" 
-                  className="flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-medium transition-all duration-300 h-auto data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30 text-gray-400 hover:text-gray-200"
+                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 h-auto data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30 text-gray-400 hover:text-gray-200"
                 >
-                  <BookOpen className="h-5 w-5 flex-shrink-0" />
-                  <span className="whitespace-nowrap">Curated Collection</span>
+                  <BookOpen className="h-4 w-4 flex-shrink-0" />
+                  <span className="whitespace-nowrap text-sm">Curated Collection</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="ai" 
-                  className="flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-medium transition-all duration-300 h-auto data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/30 text-gray-400 hover:text-gray-200"
+                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 h-auto data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/30 text-gray-400 hover:text-gray-200"
                 >
-                  <Sparkles className="h-5 w-5 flex-shrink-0" />
-                  <span className="whitespace-nowrap">AI Studio</span>
+                  <Sparkles className="h-4 w-4 flex-shrink-0" />
+                  <span className="whitespace-nowrap text-sm">AI Studio</span>
                 </TabsTrigger>
               </TabsList>
             </div>
 
             {/* Stock Algorithms Tab */}
-            <TabsContent value="stock" className="space-y-12">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-white mb-4">Interactive Algorithm Library</h2>
-                <p className="text-gray-400 text-lg font-light max-w-2xl mx-auto">
+            <TabsContent value="stock" className="space-y-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-white mb-2">Interactive Algorithm Library</h2>
+                <p className="text-gray-400 text-sm font-light max-w-2xl mx-auto">
                   Step through fundamental algorithms with real-time visualization and detailed explanations
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {stockAlgorithms.map((algo) => (
                   <Link key={algo.id} href={algo.href}>
                     <div
-                      className={`group relative bg-gradient-to-br from-gray-900/80 to-gray-950/80 backdrop-blur-xl border border-gray-800/50 rounded-3xl overflow-hidden transition-all duration-500 hover:border-gray-700/50 hover:transform hover:scale-[1.02] hover:${algo.glowColor} hover:shadow-2xl cursor-pointer`}
+                      className={`group relative bg-gradient-to-br from-gray-900/80 to-gray-950/80 backdrop-blur-xl border border-gray-800/50 rounded-2xl overflow-hidden transition-all duration-500 hover:border-gray-700/50 hover:transform hover:scale-[1.02] hover:${algo.glowColor} hover:shadow-2xl cursor-pointer`}
                     >
                       {/* Background gradient effect */}
                       <div className={`absolute inset-0 bg-gradient-to-br ${algo.accentColor} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
                       
                       {/* Visualization area */}
-                      <div className="relative p-8 pb-6">
+                      <div className="relative p-6 pb-4">
                         <AlgorithmVisualization 
                           type={algo.visualization} 
                           accentColor={algo.accentColor}
                         />
                         
                         {/* Play button for all algorithms */}
-                        <div className="absolute bottom-4 right-4 w-12 h-12 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
-                          <Play className="h-5 w-5 text-white ml-0.5" fill="currentColor" />
+                        <div className="absolute bottom-3 right-3 w-10 h-10 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
+                          <Play className="h-4 w-4 text-white ml-0.5" fill="currentColor" />
                         </div>
                       </div>
 
                       {/* Content area */}
-                      <div className="p-8 pt-4">
-                        <div className="flex items-start justify-between mb-4">
+                      <div className="p-6 pt-3">
+                        <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
-                            <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">
+                            <h3 className="text-xl font-bold text-white mb-2 tracking-tight">
                               {algo.name}
                             </h3>
-                            <div className="flex items-center gap-3 mb-4">
+                            <div className="flex items-center gap-2 mb-3">
                               <span className="text-xs font-medium text-gray-500 tracking-wider uppercase">
                                 {algo.difficulty}
                               </span>
@@ -394,7 +394,7 @@ export default function AlgoVisualizerPage() {
                           </div>
                         </div>
                         
-                        <p className="text-gray-400 leading-relaxed font-light">
+                        <p className="text-gray-400 leading-relaxed font-light text-sm">
                           {algo.description}
                         </p>
                       </div>
@@ -405,38 +405,38 @@ export default function AlgoVisualizerPage() {
             </TabsContent>
 
             {/* AI Animation Builder Tab */}
-            <TabsContent value="ai" className="space-y-12">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-white mb-4">AI Animation Studio</h2>
-                <p className="text-gray-400 text-lg font-light max-w-2xl mx-auto">
+            <TabsContent value="ai" className="space-y-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-white mb-2">AI Animation Studio</h2>
+                <p className="text-gray-400 text-sm font-light max-w-2xl mx-auto">
                   Transform ideas into interactive visualizations using artificial intelligence
                 </p>
               </div>
 
               {/* Hero AI Card */}
-              <div className="relative bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-pink-900/20 backdrop-blur-xl border border-purple-500/20 rounded-3xl overflow-hidden">
+              <div className="relative bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-pink-900/20 backdrop-blur-xl border border-purple-500/20 rounded-2xl overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-blue-600/10" />
                 
-                <div className="relative p-12 text-center">
-                  <div className="flex justify-center mb-8">
+                <div className="relative p-8 text-center">
+                  <div className="flex justify-center mb-6">
                     <div className="relative">
-                      <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-blue-500 rounded-3xl flex items-center justify-center shadow-2xl shadow-purple-500/30">
-                        <Brain className="h-12 w-12 text-white" />
+                      <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-purple-500/30">
+                        <Brain className="h-10 w-10 text-white" />
                       </div>
-                      <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-blue-400 rounded-3xl animate-pulse opacity-20" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-blue-400 rounded-2xl animate-pulse opacity-20" />
                     </div>
                   </div>
                   
-                  <h3 className="text-3xl font-bold text-white mb-6">Create with Intelligence</h3>
-                  <p className="text-gray-400 text-lg font-light mb-10 max-w-3xl mx-auto leading-relaxed">
+                  <h3 className="text-2xl font-bold text-white mb-4">Create with Intelligence</h3>
+                  <p className="text-gray-400 text-base font-light mb-6 max-w-2xl mx-auto leading-relaxed">
                     Describe any algorithm or computational concept in natural language. 
                     Our AI will generate interactive visualizations complete with code explanations 
                     and step-by-step breakdowns.
                   </p>
                   
                   <Link href="/algo-visualizer/ai-animation">
-                    <button className="group relative px-10 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold rounded-2xl transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/30 hover:scale-105">
-                      <span className="flex items-center gap-3">
+                    <button className="group relative px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/30 hover:scale-105">
+                      <span className="flex items-center gap-2">
                         <Sparkles className="h-5 w-5" />
                         Launch AI Studio
                       </span>
@@ -446,37 +446,7 @@ export default function AlgoVisualizerPage() {
                 </div>
               </div>
 
-              {/* Feature grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                  {
-                    icon: <Network className="h-8 w-8" />,
-                    title: "Natural Language Input",
-                    description: "Describe algorithms in plain English and watch them come to life"
-                  },
-                  {
-                    icon: <Zap className="h-8 w-8" />,
-                    title: "Real-time Generation", 
-                    description: "Instant visualization creation with dynamic parameter adjustment"
-                  },
-                  {
-                    icon: <PlayCircle className="h-8 w-8" />,
-                    title: "Export & Share",
-                    description: "Save animations as videos or share interactive demos"
-                  }
-                ].map((feature, index) => (
-                  <div
-                    key={index}
-                    className="group p-8 bg-gradient-to-br from-gray-900/50 to-gray-950/50 backdrop-blur-xl border border-gray-800/50 rounded-2xl hover:border-gray-700/50 transition-all duration-300 hover:transform hover:scale-105"
-                  >
-                    <div className="text-blue-400 mb-4 group-hover:text-blue-300 transition-colors duration-300">
-                      {feature.icon}
-                    </div>
-                    <h4 className="text-lg font-semibold text-white mb-3">{feature.title}</h4>
-                    <p className="text-gray-400 font-light leading-relaxed">{feature.description}</p>
-                  </div>
-                ))}
-              </div>
+             
             </TabsContent>
           </Tabs>
         </div>

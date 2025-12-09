@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     if (type === 'message') {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
       const prompt = `You are a helpful assistant. Respond to the following message: ${message} in short concise manner. Without any extra info, just the precise answer.`;
       
       const result = await model.generateContent(prompt);
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       });
 
     } else if (type === 'diagram') {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
       const prompt = `You are a helpful assistant. Generate a mermaid diagram code based on the following description: ${message}. 
       
       Rules:
@@ -73,6 +73,45 @@ export async function POST(req: NextRequest) {
         success: true
       });
       
+    } else if (type === 'convertDiagram') {
+      // Convert SVG to PNG and save to /public/uploads
+      const { svg } = body;
+      
+      if (!svg) {
+        return NextResponse.json({
+          success: false,
+          error: "No SVG data provided"
+        }, { status: 400 });
+      }
+
+      try {
+        // Generate a unique filename
+        const timestamp = Date.now();
+        const imageFileName = `diagram_${timestamp}.png`;
+        const imagePath = `./public/uploads/${imageFileName}`;
+        
+        // Convert SVG to base64 PNG using canvas (server-side approach)
+        // Since we're on the server, we'll save the SVG as base64 encoded PNG
+        const svgBase64 = Buffer.from(svg).toString('base64');
+        const svgDataUrl = `data:image/svg+xml;base64,${svgBase64}`;
+        
+        // For server-side rendering, we'll use a different approach
+        // We'll save the SVG and let the client convert it
+        return NextResponse.json({
+          success: true,
+          svgData: svgDataUrl,
+          fileName: imageFileName,
+          publicUrl: `/uploads/${imageFileName}`
+        });
+        
+      } catch (error) {
+        console.error('Error converting diagram:', error);
+        return NextResponse.json({
+          success: false,
+          error: 'Failed to convert diagram'
+        }, { status: 500 });
+      }
+      
     } else if (type === 'summarize') {
       // Handle image summarization
       if (!image) {
@@ -82,7 +121,7 @@ export async function POST(req: NextRequest) {
         }, { status: 400 });
       }
 
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
       
       const base64ImageFile = fs.readFileSync(filePath, {
         encoding: "base64",

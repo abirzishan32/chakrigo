@@ -102,12 +102,12 @@ const GlobalSidebar = ({
       label: "Algorithm Visualizer",
       id: "algo-visualizer"
     },
-    {
-      href: "/system-design",
-      icon: <BrainCog size={20} />,
-      label: "System Design",
-      id: "system-design"
-    },
+    // {
+    //   href: "/system-design",
+    //   icon: <BrainCog size={20} />,
+    //   label: "System Design",
+    //   id: "system-design"
+    // },
     {
         href: "/whiteboard",
         icon: <ClipboardPenLine size={20} />,

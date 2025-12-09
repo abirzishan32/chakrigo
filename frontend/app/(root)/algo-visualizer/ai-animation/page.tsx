@@ -199,7 +199,7 @@ export default function AIAnimationPage() {
                   {[
                     "Visualize quicksort algorithm",
                     "Show how neural networks learn", 
-                    "Animate the solar system"
+                    "Explain what is Fuzzy Interface Systems"
                   ].map(suggestion => (
                     <button 
                       key={suggestion}

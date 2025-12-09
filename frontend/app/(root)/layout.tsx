@@ -91,10 +91,8 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
                                 </h2>
                             </Link>
 
-                            {/* Main Navigation Links - Desktop */}
-                            <div className="hidden md:flex items-center gap-7">
-                                <NavLink href="/dashboard" label="Dashboard" />
-                            </div>
+                           
+                         
                         </div>
 
                         <div className="flex items-center gap-4">

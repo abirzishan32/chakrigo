@@ -100,8 +100,10 @@ export default function NavigationChatBot() {
     
     if (!input.trim()) return;
     
+    const userInput = input.trim();
+    
     // Add user message to chat
-    const userMessage = { role: 'user' as const, content: input };
+    const userMessage = { role: 'user' as const, content: userInput };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
@@ -115,6 +117,8 @@ export default function NavigationChatBot() {
     }]);
     
     try {
+      console.log('Sending navigation request:', userInput);
+      
       // Call the navigation agent API
       const response = await fetch('/api/navigation-chatbot', {
         method: 'POST',
@@ -125,18 +129,26 @@ export default function NavigationChatBot() {
           `Current Page: 
           ${currentPage}
           Query:
-          ${input}` }),
+          ${userInput}` }),
       });
       
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
+      console.log('Response data:', data);
       
       // Replace the "thinking" message with actual response
       if (data.error) {
+        console.error('API returned error:', data.error);
         setMessages(prev => [
           ...prev.slice(0, -1), 
           { 
             role: 'assistant', 
-            content: `Error: ${data.error}`, 
+            content: `${data.error}`, 
             isTyping: true,
             isThinking: false
           }
@@ -146,7 +158,7 @@ export default function NavigationChatBot() {
           ...prev.slice(0, -1), 
           { 
             role: 'assistant', 
-            content: data.response, 
+            content: data.response || 'I received your message but have no response.', 
             isTyping: true,
             isThinking: false
           }
@@ -154,6 +166,7 @@ export default function NavigationChatBot() {
         
         // Check if navigation is required
         if (data.navigate) {
+          console.log('Navigating to:', data.navigate);
           // Wait a moment before navigating so user can see the response
           setTimeout(() => {
             router.push(data.navigate);
@@ -166,7 +179,7 @@ export default function NavigationChatBot() {
         ...prev.slice(0, -1),
         { 
           role: 'assistant', 
-          content: 'Sorry, I encountered an error. Please try again.', 
+          content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`, 
           isTyping: true,
           isThinking: false
         }
@@ -248,7 +261,7 @@ export default function NavigationChatBot() {
   };
 
   return (
-    <div className="fixed right-0 top-0 bottom-0 z-40 pointer-events-none z-100">
+    <div className="fixed right-0 top-0 bottom-0 z-50 pointer-events-none">
       {/* Tab button on the right edge - only visible when panel is closed */}
       <AnimatePresence>
         {!isOpen && (

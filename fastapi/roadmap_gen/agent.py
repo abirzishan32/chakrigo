@@ -27,11 +27,11 @@ class RoadmapGenerationSystem:
         
         # Initialize LLM
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash",
+            model="gemini-2.0-flash",
             google_api_key=api_key,
-            temperature=0.3  # Lower temperature for more consistent JSON output
+            temperature=0.3 
         )
-        
+
         logger.info("Roadmap Generation System initialized")
     
     def _analyze_career_path(self, state: Dict[str, Any]) -> Dict[str, Any]:

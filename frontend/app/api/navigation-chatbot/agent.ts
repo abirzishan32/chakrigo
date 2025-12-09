@@ -102,7 +102,7 @@ Remember to respond ONLY with valid JSON that matches the specified format.
 
 export async function runNavigationAgent(query: string) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     
     console.log("Sending navigation query to Gemini API...");
     
