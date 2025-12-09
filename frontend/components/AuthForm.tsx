@@ -288,7 +288,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
                     {/* Form Card */}
                     <div className="bg-gradient-to-br from-[#1e1e2e]/80 to-[#2a2a3e]/60 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/10">
-                        <div className="mb-8">
+                        <div className="mb-8 text-center">
                             <h3 className="text-3xl font-bold text-white mb-2">
                                 {isSignIn ? "Welcome Back" : "Create Account"}
                             </h3>

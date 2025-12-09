@@ -4,7 +4,6 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { getCurrentUser, signOut } from "@/lib/actions/auth.action";
 import SignOutButton from "@/components/SignOutButton";
-import { NotificationMenu } from "@/components/notifications/NotificationMenu";
 import {
   Home,
   Users,
@@ -102,12 +101,6 @@ const GlobalSidebar = ({
       label: "Algorithm Visualizer",
       id: "algo-visualizer"
     },
-    // {
-    //   href: "/system-design",
-    //   icon: <BrainCog size={20} />,
-    //   label: "System Design",
-    //   id: "system-design"
-    // },
     {
         href: "/whiteboard",
         icon: <ClipboardPenLine size={20} />,
@@ -215,14 +208,7 @@ const GlobalSidebar = ({
                         </motion.button>
                     </div>
 
-                    {/* Notification section - better positioned */}
-                    {isUserAuth && (
-                        <div className={`${isSidebarCollapsed ? 'px-2 pb-4' : 'px-4 pb-4'}`}>
-                            <div className="relative">
-                                <NotificationMenu collapsed={isSidebarCollapsed} />
-                            </div>
-                        </div>
-                    )}
+              
                 </div>
 
         {/* Navigation Links */}
