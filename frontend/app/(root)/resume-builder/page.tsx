@@ -24,7 +24,7 @@ export default function ResumeBuilder() {
     <ResumeProvider>
       <ThemeProvider>
         {/* Full viewport seamless split-screen layout */}
-        <div className="flex h-screen w-screen overflow-hidden bg-[#0F1419]">
+        <div className="flex h-full w-full overflow-hidden bg-[#0F1419]">
           
           {/* LEFT PANEL - Resume Editor (50% width) */}
           <div className="w-1/2 h-full flex flex-col bg-[#0F1419] border-r border-gray-800">

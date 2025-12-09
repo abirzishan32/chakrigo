@@ -6,7 +6,7 @@ export default function ResumeBuilderLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 overflow-hidden">
+    <div className="h-full w-full">
       {children}
     </div>
   );
