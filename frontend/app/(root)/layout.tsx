@@ -16,6 +16,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<any>(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [isSidebarHidden, setIsSidebarHidden] = useState(false);
     const pathname = usePathname();
 
     // Check if current path is homepage or auth pages
@@ -274,16 +275,19 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
                     <GlobalSidebar
                         isSidebarCollapsed={isSidebarCollapsed}
                         toggleSidebar={toggleSidebar}
+                        onHiddenChange={setIsSidebarHidden}
                     />
 
-                    {/* Main Content */}
-                    <div
-                        className={`flex-1 transition-all duration-300 ${
-                            isSidebarCollapsed ? "ml-20" : "ml-64"
-                        }`}
+                    {/* Main Content - dynamically adjusts when sidebar is hidden */}
+                    <motion.div
+                        animate={{
+                            marginLeft: isSidebarHidden ? "0px" : (isSidebarCollapsed ? "80px" : "260px")
+                        }}
+                        transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+                        className="flex-1"
                     >
                         <div className="h-full overflow-y-auto">{children}</div>
-                    </div>
+                    </motion.div>
                 </div>
             </NotificationProvider>
         </SocketProvider>

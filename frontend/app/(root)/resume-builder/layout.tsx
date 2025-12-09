@@ -6,7 +6,7 @@ export default function ResumeBuilderLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="container mx-auto py-6 min-h-screen">
+    <div className="fixed inset-0 overflow-hidden">
       {children}
     </div>
   );
