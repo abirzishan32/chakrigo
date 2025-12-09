@@ -2,6 +2,14 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
+export interface ElementStyles {
+  fontSize?: number;
+  color?: string;
+  fontWeight?: string;
+  fontStyle?: string;
+  textAlign?: string;
+}
+
 interface Theme {
   colors: {
     primary: string;
@@ -25,6 +33,10 @@ interface ThemeContextType {
   updateTheme: (theme: Partial<Theme>) => void;
   getFontSizeClass: () => string;
   getLineHeightClass: () => string;
+  elementStyles: Record<string, ElementStyles>;
+  updateElementStyles: (elementId: string, styles: ElementStyles) => void;
+  resetElementStyles: (elementId: string) => void;
+  getElementStyles: (elementId: string) => ElementStyles;
 }
 
 const defaultTheme: Theme = {
@@ -50,12 +62,17 @@ const ThemeContext = createContext<ThemeContextType>({
   updateTheme: () => {},
   getFontSizeClass: () => "",
   getLineHeightClass: () => "",
+  elementStyles: {},
+  updateElementStyles: () => {},
+  resetElementStyles: () => {},
+  getElementStyles: () => ({}),
 });
 
 export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState<Theme>(defaultTheme);
+  const [elementStyles, setElementStyles] = useState<Record<string, ElementStyles>>({});
 
   const updateTheme = (newThemeValues: Partial<Theme>) => {
     setTheme(prevTheme => ({
@@ -74,6 +91,28 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         ...(newThemeValues.spacing || {})
       }
     }));
+  };
+
+  const updateElementStyles = (elementId: string, styles: ElementStyles) => {
+    setElementStyles(prev => ({
+      ...prev,
+      [elementId]: {
+        ...prev[elementId],
+        ...styles,
+      },
+    }));
+  };
+
+  const resetElementStyles = (elementId: string) => {
+    setElementStyles(prev => {
+      const newStyles = { ...prev };
+      delete newStyles[elementId];
+      return newStyles;
+    });
+  };
+
+  const getElementStyles = (elementId: string): ElementStyles => {
+    return elementStyles[elementId] || {};
   };
 
   const getFontSizeClass = (): string => {
@@ -96,7 +135,16 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, updateTheme, getFontSizeClass, getLineHeightClass }}>
+    <ThemeContext.Provider value={{ 
+      theme, 
+      updateTheme, 
+      getFontSizeClass, 
+      getLineHeightClass,
+      elementStyles,
+      updateElementStyles,
+      resetElementStyles,
+      getElementStyles,
+    }}>
       {children}
     </ThemeContext.Provider>
   );

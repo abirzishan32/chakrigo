@@ -206,7 +206,7 @@ export default function ResumeBuilder() {
           </div>
 
           {/* RIGHT PANEL - Live Preview (50% width) */}
-          <div className="w-1/2 h-full flex flex-col bg-[#1F2937]">
+          <div className="w-1/2 h-full flex flex-col bg-white">
             
             {/* Preview Header */}
             <div className="bg-[#1A1F2E] px-6 py-4 border-b border-gray-800 flex items-center justify-between flex-shrink-0">
@@ -217,8 +217,8 @@ export default function ResumeBuilder() {
               <span className="text-xs text-gray-400">Updates in real-time</span>
             </div>
             
-            {/* Preview Content Area */}
-            <div className="flex-1 overflow-auto bg-[#2D3748] p-8">
+            {/* Preview Content Area - White background fills entire area */}
+            <div className="flex-1 overflow-auto bg-white">
               <ResumePreview />
             </div>
           </div>

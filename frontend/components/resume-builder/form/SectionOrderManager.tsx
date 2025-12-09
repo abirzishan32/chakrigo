@@ -43,7 +43,7 @@ export default function SectionOrderManager() {
   };
 
   return (
-    <div className="space-y-4 bg-gray-900 rounded-lg p-6">
+    <div className="space-y-4">
       <h2 className="text-xl font-bold text-white mb-2">Section Order & Visibility</h2>
       <p className="text-sm text-gray-400 mb-4">
         Drag and drop to reorder sections. Click the eye icon to toggle visibility.
