@@ -7,11 +7,11 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+import { passwordStrength } from "check-password-strength";
+import { ArrowRight, Sparkles } from "lucide-react";
 
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-
 
 import FormField from "./FormField";
 
@@ -21,11 +21,22 @@ import {createUserWithEmailAndPassword} from "firebase/auth";
 import {signInWithEmailAndPassword} from "firebase/auth";
 
 
+type FormType = "sign-in" | "sign-up";
+
 const authFormSchema = (type: FormType) => {
     return z.object({
         name: type === "sign-up" ? z.string().min(3) : z.string().optional(),
         email: z.string().email(),
-        password: z.string().min(3),
+        password: z.string().min(8, "Password must be at least 8 characters"),
+        confirmPassword: type === "sign-up" ? z.string() : z.string().optional(),
+    }).refine((data) => {
+        if (type === "sign-up") {
+            return data.password === data.confirmPassword;
+        }
+        return true;
+    }, {
+        message: "Passwords do not match",
+        path: ["confirmPassword"],
     });
 };
 
@@ -39,7 +50,9 @@ const AuthForm = ({ type }: { type: FormType }) => {
             name: "",
             email: "",
             password: "",
+            confirmPassword: "",
         },
+        mode: "onChange",
     });
 
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
@@ -99,61 +112,223 @@ const AuthForm = ({ type }: { type: FormType }) => {
     const isSignIn = type === "sign-in";
 
     return (
-        <div className="card-border lg:min-w-[566px]">
-            <div className="flex flex-col gap-6 card py-14 px-10">
-                <div className="flex flex-row gap-2 justify-center">
-                    <Image src="/chakrigo-logo.png" alt="logo" height={32} width={38} />
-                    <h2 className="text-primary-100">ChakriGO</h2>
-                </div>
-
-                <h3>Practice job interviews with AI</h3>
-
-                <Form {...form}>
-                    <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="w-full space-y-6 mt-4 form"
-                    >
-                        {!isSignIn && (
-                            <FormField
-                                control={form.control}
-                                name="name"
-                                label="Name"
-                                placeholder="Your Name"
-                                type="text"
+        <div className="min-h-screen w-full flex overflow-hidden">
+            {/* Left Panel - Welcome Section */}
+            <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f0f23]">
+                {/* Animated gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 via-blue-600/10 to-transparent opacity-50"></div>
+                
+                {/* Glassmorphism effect */}
+                <div className="absolute inset-0 backdrop-blur-3xl bg-white/5"></div>
+                
+                {/* Glowing orbs */}
+                <div className="absolute top-20 left-20 w-72 h-72 bg-purple-600/30 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+                
+                {/* Content */}
+                <div className="relative z-10 flex flex-col justify-center items-start px-16 w-full">
+                    {/* Logo */}
+                    <div className="flex items-center gap-3 mb-12">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-purple-500/30 rounded-full blur-xl"></div>
+                            <Image 
+                                src="/chakrigo-logo.png" 
+                                alt="ChakriGO Logo" 
+                                width={56} 
+                                height={56}
+                                className="relative rounded-full"
                             />
+                        </div>
+                        <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent">
+                            ChakriGO
+                        </h1>
+                    </div>
+
+                    {/* Welcome message */}
+                    <div className="space-y-6 max-w-md">
+                        
+                        
+                        <h2 className="text-5xl font-bold text-white leading-tight">
+                            Welcome to
+                            <br />
+                            <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                                ChakriGO
+                            </span>
+                        </h2>
+                        
+                        <p className="text-gray-300 text-lg leading-relaxed">
+                            Elevate your interview preparation with AI-driven insights, 
+                            personalized feedback, and real-time practice sessions.
+                        </p>
+
+                        {/* Features list */}
+                        <div className="space-y-3 mt-8">
+                            {[
+                                "Smart AI Interview Simulation",
+                                "Real-time Performance Analytics",
+                                "Personalized Career Guidance"
+                            ].map((feature, index) => (
+                                <div key={index} className="flex items-center gap-3">
+                                    <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full"></div>
+                                    <span className="text-gray-300">{feature}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* CTA for existing users */}
+                        {!isSignIn && (
+                            <div className="mt-12 p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                                <p className="text-gray-300 mb-4">Already have an account?</p>
+                                <Link
+                                    href="/sign-in"
+                                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold transition-all duration-300 group"
+                                >
+                                    Sign In
+                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                </Link>
+                            </div>
                         )}
+                    </div>
+                </div>
+            </div>
 
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            label="Email"
-                            placeholder="Your email address"
-                            type="email"
-                        />
+            {/* Right Panel - Form Section */}
+            <div className="flex-1 lg:w-1/2 w-full flex items-center justify-center bg-gradient-to-br from-[#0a0a0f] to-[#1a1a24] p-8">
+                <div className="w-full max-w-md">
+                    {/* Mobile Logo */}
+                    <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
+                        <Image src="/chakrigo-logo.png" alt="logo" height={40} width={40} />
+                        <h2 className="text-2xl font-bold text-white">ChakriGO</h2>
+                    </div>
 
-                        <FormField
-                            control={form.control}
-                            name="password"
-                            label="Password"
-                            placeholder="Enter your password"
-                            type="password"
-                        />
+                    {/* Form Card */}
+                    <div className="bg-gradient-to-br from-[#1e1e2e]/80 to-[#2a2a3e]/60 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/10">
+                        <div className="mb-8">
+                            <h3 className="text-3xl font-bold text-white mb-2">
+                                {isSignIn ? "Welcome Back" : "Create Account"}
+                            </h3>
+                            <p className="text-gray-400">
+                                {isSignIn 
+                                    ? "Sign in to continue your journey" 
+                                    : "Start your interview preparation journey"}
+                            </p>
+                        </div>
 
-                        <Button className="btn" type="submit">
-                            {isSignIn ? "Sign In" : "Create an Account"}
-                        </Button>
-                    </form>
-                </Form>
+                        <Form {...form}>
+                            <form
+                                onSubmit={form.handleSubmit(onSubmit)}
+                                className="space-y-5"
+                            >
+                                {!isSignIn && (
+                                    <FormField
+                                        control={form.control}
+                                        name="name"
+                                        label="Name"
+                                        placeholder="Your Name"
+                                        type="text"
+                                    />
+                                )}
 
-                <p className="text-center">
-                    {isSignIn ? "No account yet?" : "Have an account already?"}
-                    <Link
-                        href={!isSignIn ? "/sign-in" : "/sign-up"}
-                        className="font-bold text-user-primary ml-1"
-                    >
-                        {!isSignIn ? "Sign In" : "Sign Up"}
-                    </Link>
-                </p>
+                                <FormField
+                                    control={form.control}
+                                    name="email"
+                                    label="Email"
+                                    placeholder="Your email address"
+                                    type="email"
+                                />
+
+                                <div className="space-y-2">
+                                    <FormField
+                                        control={form.control}
+                                        name="password"
+                                        label="Password"
+                                        placeholder="Enter your password"
+                                        type="password"
+                                    />
+
+                                    {/* Password Strength Indicator - Fixed Height Container */}
+                                    <div className="min-h-[60px]">
+                                        {!isSignIn && (form.watch("password")?.length ?? 0) > 0 && (
+                                            <div className="space-y-2 animate-fade-in">
+                                                <div className="flex gap-2">
+                                                    {Array.from({ length: 4 }).map((_, i) => {
+                                                        const password = form.watch("password") ?? "";
+                                                        const strength = passwordStrength(password).id;
+                                                        return (
+                                                            <div 
+                                                                key={i} 
+                                                                className={`h-2 flex-1 rounded-full transition-all duration-500 ${
+                                                                    strength >= i 
+                                                                        ? ['bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]', 
+                                                                           'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]', 
+                                                                           'bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.5)]', 
+                                                                           'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]'][strength] 
+                                                                        : 'bg-gray-700'
+                                                                }`}
+                                                            />
+                                                        )
+                                                    })}
+                                                </div>
+                                                <p className="text-xs text-right text-gray-400">
+                                                    Password strength: <span className={`font-semibold ${
+                                                        ['text-red-400', 'text-orange-400', 'text-yellow-400', 'text-green-400'][passwordStrength(form.watch("password") ?? "").id]
+                                                    }`}>
+                                                        {['Weak', 'Fair', 'Good', 'Strong'][passwordStrength(form.watch("password") ?? "").id]}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {!isSignIn && (
+                                    <div>
+                                        <FormField
+                                            control={form.control}
+                                            name="confirmPassword"
+                                            label="Confirm Password"
+                                            placeholder="Confirm your password"
+                                            type="password"
+                                        />
+                                        {/* Password Match Error - Fixed Height Container */}
+                                        <div className="min-h-[24px] mt-1">
+                                            {(() => {
+                                                const confirmPassword = form.watch("confirmPassword") ?? "";
+                                                const password = form.watch("password") ?? "";
+                                                return confirmPassword.length > 0 && password !== confirmPassword && (
+                                                    <p className="text-xs text-red-400 flex items-center gap-1 animate-fade-in">
+                                                        <span className="inline-block w-1 h-1 bg-red-400 rounded-full"></span>
+                                                        Passwords do not match
+                                                    </p>
+                                                );
+                                            })()}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <Button 
+                                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-6 rounded-xl shadow-lg shadow-purple-500/30 transition-all duration-300 hover:shadow-purple-500/50 hover:scale-[1.02] mt-6" 
+                                    type="submit"
+                                >
+                                    {isSignIn ? "Sign In" : "Create an Account"}
+                                </Button>
+                            </form>
+                        </Form>
+
+                        {/* Bottom link */}
+                        <div className="mt-6 text-center">
+                            <p className="text-gray-400 text-sm">
+                                {isSignIn ? "Don't have an account?" : "Already have an account?"}
+                                <Link
+                                    href={!isSignIn ? "/sign-in" : "/sign-up"}
+                                    className="ml-2 text-purple-400 hover:text-purple-300 font-semibold transition-colors"
+                                >
+                                    {!isSignIn ? "Sign In" : "Sign Up"}
+                                </Link>
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

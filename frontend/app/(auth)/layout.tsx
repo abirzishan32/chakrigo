@@ -7,7 +7,7 @@ const AuthLayout = async ({ children }: { children: ReactNode }) => {
     if (isUserAuth) redirect('/interview-home')
 
     return (
-        <div className="auth-layout">{children}</div>
+        <div className="w-full h-screen overflow-hidden">{children}</div>
     )
 }
 
