@@ -7,7 +7,6 @@ import SignOutButton from "@/components/SignOutButton";
 import {
   Home,
   Users,
-  FileText,
   Brain,
   Bot,
   ChevronRight,
