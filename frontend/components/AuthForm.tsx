@@ -17,8 +17,9 @@ import FormField from "./FormField";
 
 import { auth } from "@/firebase/client";
 import {signIn, signUp} from "@/lib/actions/auth.action";
-import {createUserWithEmailAndPassword} from "firebase/auth";
+import {createUserWithEmailAndPassword, sendEmailVerification} from "firebase/auth";
 import {signInWithEmailAndPassword} from "firebase/auth";
+import { useState } from "react";
 
 
 type FormType = "sign-in" | "sign-up";
@@ -42,6 +43,7 @@ const authFormSchema = (type: FormType) => {
 
 const AuthForm = ({ type }: { type: FormType }) => {
     const router = useRouter();
+    const [isResendingEmail, setIsResendingEmail] = useState(false);
 
     const formSchema = authFormSchema(type);
     const form = useForm<z.infer<typeof formSchema>>({
@@ -66,6 +68,9 @@ const AuthForm = ({ type }: { type: FormType }) => {
                     password
                 );
 
+                // Send email verification
+                await sendEmailVerification(userCredential.user);
+
                 const result = await signUp({
                     uid: userCredential.user.uid,
                     name: name!,
@@ -78,7 +83,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
                     return;
                 }
 
-                toast.success("Account created successfully. Please sign in.");
+                toast.success("Account created! Please check your email to verify your account.");
                 router.push("/sign-in");
             } else {
                 const { email, password } = data;
@@ -88,6 +93,12 @@ const AuthForm = ({ type }: { type: FormType }) => {
                     email,
                     password
                 );
+
+                // Check if email is verified
+                if (!userCredential.user.emailVerified) {
+                    toast.error("Please verify your email before signing in. Check your inbox for the verification link.");
+                    return;
+                }
 
                 const idToken = await userCredential.user.getIdToken();
                 if (!idToken) {
@@ -103,9 +114,46 @@ const AuthForm = ({ type }: { type: FormType }) => {
                 toast.success("Signed in successfully.");
                 router.push("/");
             }
-        } catch (error) {
+        } catch (error: any) {
             console.log(error);
-            toast.error(`There was an error: ${error}`);
+            
+            // Handle specific Firebase errors
+            if (error.code === "auth/email-already-in-use") {
+                toast.error("This email is already registered. Please sign in instead.");
+            } else if (error.code === "auth/wrong-password" || error.code === "auth/user-not-found") {
+                toast.error("Invalid email or password.");
+            } else if (error.code === "auth/too-many-requests") {
+                toast.error("Too many failed attempts. Please try again later.");
+            } else {
+                toast.error(`There was an error: ${error.message}`);
+            }
+        }
+    };
+
+    const handleResendVerification = async () => {
+        const email = form.getValues("email");
+        const password = form.getValues("password");
+
+        if (!email || !password) {
+            toast.error("Please enter your email and password first.");
+            return;
+        }
+
+        setIsResendingEmail(true);
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            
+            if (userCredential.user.emailVerified) {
+                toast.info("Your email is already verified. You can sign in now.");
+                return;
+            }
+
+            await sendEmailVerification(userCredential.user);
+            toast.success("Verification email sent! Please check your inbox.");
+        } catch (error: any) {
+            toast.error("Failed to resend verification email. Please try again.");
+        } finally {
+            setIsResendingEmail(false);
         }
     };
 
@@ -306,12 +354,36 @@ const AuthForm = ({ type }: { type: FormType }) => {
                                     </div>
                                 )}
 
+                                {/* Forgot Password Link - Sign In Only */}
+                                {isSignIn && (
+                                    <div className="text-right">
+                                        <Link
+                                            href="/forgot-password"
+                                            className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+                                        >
+                                            Forgot Password?
+                                        </Link>
+                                    </div>
+                                )}
+
                                 <Button 
                                     className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-6 rounded-xl shadow-lg shadow-purple-500/30 transition-all duration-300 hover:shadow-purple-500/50 hover:scale-[1.02] mt-6" 
                                     type="submit"
                                 >
                                     {isSignIn ? "Sign In" : "Create an Account"}
                                 </Button>
+
+                                {/* Resend Verification Email - Sign In Only */}
+                                {isSignIn && (
+                                    <Button
+                                        type="button"
+                                        onClick={handleResendVerification}
+                                        disabled={isResendingEmail}
+                                        className="w-full bg-transparent border border-purple-500/30 hover:border-purple-500/50 text-purple-400 hover:text-purple-300 font-medium py-3 rounded-xl transition-all duration-300"
+                                    >
+                                        {isResendingEmail ? "Sending..." : "Resend Verification Email"}
+                                    </Button>
+                                )}
                             </form>
                         </Form>
 
