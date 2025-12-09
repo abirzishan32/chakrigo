@@ -13,12 +13,13 @@ const InterviewCard = async ({id, userId, role, type, techstack, createdAt, comp
 
     const normalizedType = /mix/gi.test(type) ? "Mixed" : type;
 
-    const badgeColor =
+    // Color-coded category tabs with 70% opacity
+    const categoryTabStyle =
         {
-            Behavioral: "bg-black text-emerald-400 border border-emerald-900",
-            Mixed: "bg-black text-violet-400 border border-violet-900",
-            Technical: "bg-black text-blue-400 border border-blue-900",
-        }[normalizedType] || "bg-black text-violet-400 border border-violet-900";
+            Behavioral: "bg-[#10B981]/70",
+            Mixed: "bg-[#8B5CF6]/70",
+            Technical: "bg-[#3B82F6]/70",
+        }[normalizedType] || "bg-[#8B5CF6]/70";
 
     const formattedDate = dayjs(
         feedback?.createdAt || createdAt || Date.now()
@@ -28,54 +29,57 @@ const InterviewCard = async ({id, userId, role, type, techstack, createdAt, comp
     const displayCompany = companyName || (isModeratorInterview && company) || "";
 
     return (
-        <div className="border border-gray-800 rounded-xl overflow-hidden bg-gradient-to-br from-gray-950 to-black shadow-lg hover:shadow-xl hover:shadow-primary-900/20 transition-all duration-300 w-[360px] max-sm:w-full min-h-[340px]">
-            <div className="p-5 relative">
-                <div>
-                    {/* Type Badge */}
-                    <div
-                        className={cn(
-                            "absolute top-0 right-0 w-fit px-4 py-2 rounded-bl-lg shadow-md",
-                            badgeColor
-                        )}
-                    >
-                        <p className="font-medium text-sm tracking-wide">{normalizedType}</p>
-                    </div>
+        <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg overflow-hidden shadow-[0_6px_16px_rgba(0,0,0,0.4)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.5)] transition-all duration-200 ease-in-out hover:scale-[1.02] w-[320px] max-sm:w-full min-h-[280px] flex flex-col relative">
+            {/* Color-coded category tab - top-left positioning for visual rhythm */}
+            <div
+                className={cn(
+                    "absolute top-0 left-0 w-20 h-8 rounded-br-lg flex items-center justify-center shadow-lg z-10",
+                    categoryTabStyle
+                )}
+            >
+                <p className="font-bold text-[10px] text-white tracking-wider uppercase">{normalizedType}</p>
+            </div>
 
-                    {/* Interview Role - Modern styling with accent border */}
-                    <div className="mt-4 border-l-4 border-primary pl-3">
-                        <h3 className="capitalize text-white text-xl font-bold tracking-tight">{role} Interview</h3>
+            <div className="p-3 flex flex-col flex-1">
+                {/* Main content area with consistent spacing */}
+                <div className="flex-1 flex flex-col">
+                    {/* Interview Role - Enhanced typography hierarchy */}
+                    <div className="mt-6 mb-2">
+                        <h3 className="capitalize text-white text-xl font-bold tracking-tight leading-tight">
+                            {role} Interview
+                        </h3>
                     </div>
 
                     {/* Company Name - Show for both company and moderator interviews */}
                     {(isCompanyInterview || isModeratorInterview) && displayCompany && (
-                        <div className="mt-2 flex items-center">
-                        <span className="text-primary-100 font-medium text-sm">
-                          {displayCompany} • {level || 'Any Level'}
-                        </span>
+                        <div className="mt-1 mb-2 flex items-center">
+                            <span className="text-[#A0A0A0] font-medium text-xs">
+                                {displayCompany} • {level || 'Any Level'}
+                            </span>
                         </div>
                     )}
 
-                    {/* Date & Score */}
-                    <div className="flex flex-row gap-5 mt-4 text-gray-300">
-                        <div className="flex flex-row gap-2 items-center">
+                    {/* Date & Score - Improved readability */}
+                    <div className="flex flex-row gap-4 mt-2 text-[#B0B0B0]">
+                        <div className="flex flex-row gap-1.5 items-center">
                             <Image
                                 src="/calendar.svg"
-                                width={22}
-                                height={22}
+                                width={16}
+                                height={16}
                                 alt="calendar"
-                                className="opacity-80"
+                                className="opacity-70"
                             />
-                            <p>{formattedDate}</p>
+                            <p className="text-xs font-normal">{formattedDate}</p>
                         </div>
 
-                        <div className="flex flex-row gap-2 items-center">
-                            <Image src="/star.svg" width={22} height={22} alt="star" className="opacity-80" />
-                            <p className="text-primary-100">{feedback?.totalScore || "---"}/100</p>
+                        <div className="flex flex-row gap-1.5 items-center">
+                            <Image src="/star.svg" width={16} height={16} alt="star" className="opacity-70" />
+                            <p className="text-xs font-semibold text-[#3B82F6]">{feedback?.totalScore || "---"}/100</p>
                         </div>
                     </div>
 
-                    {/* Feedback or Placeholder Text */}
-                    <p className="line-clamp-2 mt-5 text-gray-400">
+                    {/* Feedback or Placeholder Text - WCAG compliant contrast */}
+                    <p className="line-clamp-2 mt-3 text-[#A0A0A0] text-xs font-normal leading-relaxed">
                         {feedback?.finalAssessment ||
                             ((isCompanyInterview || isModeratorInterview) && displayCompany
                                 ? `Practice interview for ${displayCompany}. Take it now to improve your chances!`
@@ -83,10 +87,11 @@ const InterviewCard = async ({id, userId, role, type, techstack, createdAt, comp
                     </p>
                 </div>
 
-                <div className="flex flex-row justify-between mt-5 pt-4 border-t border-gray-800">
-                    <DisplayTechIcons techStack={techstack} />
+                {/* Footer section - Consistent alignment */}
+                <div className="flex flex-row justify-between items-center mt-auto pt-3 border-t border-[#2A2A2A]">
+                   
 
-                    <Button className="bg-primary-100 text-black hover:bg-primary-200 font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg hover:shadow-primary-900/20">
+                    <button className="bg-[#2563EB] text-white font-semibold text-xs px-3 py-2 rounded-lg transition-all duration-200 ease-in-out hover:scale-[1.05] hover:shadow-[0_8px_20px_rgba(37,99,235,0.4)] active:scale-[0.98] flex-shrink-0">
                         <Link
                             href={
                                 feedback
@@ -96,7 +101,7 @@ const InterviewCard = async ({id, userId, role, type, techstack, createdAt, comp
                         >
                             {feedback ? "Check Feedback" : "View Interview"}
                         </Link>
-                    </Button>
+                    </button>
                 </div>
             </div>
         </div>
