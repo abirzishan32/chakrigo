@@ -275,10 +275,9 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
                     <GlobalSidebar
                         isSidebarCollapsed={isSidebarCollapsed}
                         toggleSidebar={toggleSidebar}
-                        onHiddenChange={setIsSidebarHidden}
                     />
 
-                    {/* Main Content - dynamically adjusts when sidebar is hidden */}
+                    {/* Main Content */}
                     <motion.div
                         animate={{
                             marginLeft: isSidebarHidden ? "0px" : (isSidebarCollapsed ? "80px" : "260px")

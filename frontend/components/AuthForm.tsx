@@ -278,7 +278,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
             </div>
 
             {/* Right Panel - Form Section */}
-            <div className="flex-1 lg:w-1/2 w-full flex items-center justify-center bg-gradient-to-br from-[#0a0a0f] to-[#1a1a24] p-8">
+            <div className="flex-1 lg:w-1/2 w-full flex items-center justify-center bg-gradient-to-br from-[#0a0a0f] to-[#1a1a24] p-4 py-6">
                 <div className="w-full max-w-md">
                     {/* Mobile Logo */}
                     <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
@@ -287,12 +287,12 @@ const AuthForm = ({ type }: { type: FormType }) => {
                     </div>
 
                     {/* Form Card */}
-                    <div className="bg-gradient-to-br from-[#1e1e2e]/80 to-[#2a2a3e]/60 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/10">
-                        <div className="mb-8 text-center">
-                            <h3 className="text-3xl font-bold text-white mb-2">
+                    <div className="bg-gradient-to-br from-[#1e1e2e]/80 to-[#2a2a3e]/60 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/10">
+                        <div className="mb-6 text-center">
+                            <h3 className="text-2xl font-bold text-white mb-1">
                                 {isSignIn ? "Welcome Back" : "Create Account"}
                             </h3>
-                            <p className="text-gray-400">
+                            <p className="text-sm text-gray-400">
                                 {isSignIn 
                                     ? "Sign in to continue your journey" 
                                     : "Start your interview preparation journey"}
@@ -302,7 +302,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
                         <Form {...form}>
                             <form
                                 onSubmit={form.handleSubmit(onSubmit)}
-                                className="space-y-5"
+                                className="space-y-3"
                             >
                                 {!isSignIn && (
                                     <FormField
@@ -332,7 +332,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
                                     />
 
                                     {/* Password Strength Indicator - Fixed Height Container */}
-                                    <div className="min-h-[60px]">
+                                    <div className="min-h-[50px]">
                                         {!isSignIn && (form.watch("password")?.length ?? 0) > 0 && (
                                             <div className="space-y-2 animate-fade-in">
                                                 <div className="flex gap-2">
@@ -403,8 +403,30 @@ const AuthForm = ({ type }: { type: FormType }) => {
                                     </div>
                                 )}
 
+                                {/* Terms and Privacy Policy Agreement */}
+                                {!isSignIn && (
+                                    <p className="text-xs text-center text-gray-400 mt-2">
+                                        By clicking above, I agree to our{" "}
+                                        <Link 
+                                            href="/terms-and-conditions" 
+                                            target="_blank"
+                                            className="text-purple-400 hover:text-purple-300 underline transition-colors"
+                                        >
+                                            Terms of Service
+                                        </Link>
+                                        {" "}&{" "}
+                                        <Link 
+                                            href="/privacy-policy" 
+                                            target="_blank"
+                                            className="text-purple-400 hover:text-purple-300 underline transition-colors"
+                                        >
+                                            Privacy Policy
+                                        </Link>
+                                    </p>
+                                )}
+
                                 <Button 
-                                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-6 rounded-xl shadow-lg shadow-purple-500/30 transition-all duration-300 hover:shadow-purple-500/50 hover:scale-[1.02] mt-6" 
+                                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-purple-500/30 transition-all duration-300 hover:shadow-purple-500/50 hover:scale-[1.02] mt-4" 
                                     type="submit"
                                 >
                                     {isSignIn ? "Sign In" : "Create an Account"}
@@ -413,7 +435,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
                         </Form>
 
                         {/* Divider */}
-                        <div className="relative my-6">
+                        <div className="relative my-4">
                             <div className="absolute inset-0 flex items-center">
                                 <div className="w-full border-t border-white/10"></div>
                             </div>
@@ -428,7 +450,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
                         <Button
                             type="button"
                             onClick={handleGoogleSignIn}
-                            className="w-full bg-white hover:bg-gray-100 text-gray-900 font-semibold py-6 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] flex items-center justify-center gap-3"
+                            className="w-full bg-white hover:bg-gray-100 text-gray-900 font-semibold py-3 text-sm rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] flex items-center justify-center gap-3"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path
@@ -457,14 +479,14 @@ const AuthForm = ({ type }: { type: FormType }) => {
                                 type="button"
                                 onClick={handleResendVerification}
                                 disabled={isResendingEmail}
-                                className="w-full mt-4 bg-transparent border border-purple-500/30 hover:border-purple-500/50 text-purple-400 hover:text-purple-300 font-medium py-3 rounded-xl transition-all duration-300"
+                                className="w-full mt-3 bg-transparent border border-purple-500/30 hover:border-purple-500/50 text-purple-400 hover:text-purple-300 font-medium py-2.5 text-sm rounded-xl transition-all duration-300"
                             >
                                 {isResendingEmail ? "Sending..." : "Resend Verification Email"}
                             </Button>
                         )}
 
                         {/* Bottom link */}
-                        <div className="mt-6 text-center">
+                        <div className="mt-4 text-center">
                             <p className="text-gray-400 text-sm">
                                 {isSignIn ? "Don't have an account?" : "Already have an account?"}
                                 <Link
