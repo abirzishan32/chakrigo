@@ -4,7 +4,7 @@ import {getAuth} from "firebase/auth"
 import {getFirestore} from "firebase/firestore";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCPPguYa1nb6_xWzzqz-fWwEPzvZpXMtQc",
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: "candid-minds.firebaseapp.com",
     projectId: "candid-minds",
     storageBucket: "candid-minds.firebasestorage.app",
